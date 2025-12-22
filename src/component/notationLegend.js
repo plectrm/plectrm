@@ -108,7 +108,7 @@ class TechniqueEntry{
             if (event.button == 2){
                 const editEntryMenu = new TransientInput;
                 editEntryMenu.setPosition(event, null);
-                editEntryMenu.createAndAddLabel('Notation Legend entry');
+                editEntryMenu.createAndAddLabel('Notation Legend');
                 editEntryMenu.createAndAddDivisor();
                 editEntryMenu.createAndAddLabel('symbol');
                 editEntryMenu.createAndAddTextInput(this.symbol.trim(), (contents) => {
