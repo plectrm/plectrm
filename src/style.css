@@ -326,6 +326,10 @@ body{
     grid-template-columns: 2em auto;
 }
 
+.prototypeContainer.legend{
+    grid-template-columns: 2em auto;
+}
+
 .prototypeContainer:hover .contextMenu{
     opacity: 100%;
 }
@@ -649,6 +653,43 @@ body{
 
 .textBox:focus-visible{
     outline: 0;
+}
+
+.notationLegend{
+    margin: 0 0.3rem;
+    font-family: 'FantasqueSansMono', monospace;
+    min-height: 1em;
+    min-width: 8em;
+    background-color: transparent;
+    border: 0px;
+    height: fit-content;
+    align-self: center;
+    overflow: hidden;
+    white-space: pre-line;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+}
+
+.notationLegend div.divider{
+    height: 100%;
+    width: 100%;
+}
+
+.notationLegend div.entriesContainer{
+    min-height: 1em;
+    display: flex;
+    flex-direction: column;
+}
+
+.entriesContainer div.entry{
+    pointer-events: all;
+    background-color: transparent;
+    transition: background-color 80ms ease-in-out
+}
+
+.entriesContainer div.entry:hover{
+    background-color: var(--color-light-secondary);
 }
 
 .transientInputContainer{
