@@ -5,6 +5,7 @@ export class NotationLegend {
     constructor(workspace, textContent = '') {
 
         this.parentWorkspace = workspace;
+        this.contextMenuOptions = [{label: 'remove', func: this.remove}];
 
         this.componentContainer = document.createElement('div');
         this.componentContainer.classList.add('prototypeContainer','legend');
@@ -26,7 +27,9 @@ export class NotationLegend {
         this.techniqueEntries.push(new TechniqueEntry(this, '/', 'Slide Up'));
         this.techniqueEntries.push(new TechniqueEntry(this, 'PMAB', 'Palm Mute'));
 
+
         this.componentContainer.appendChild(this.legendContainer);
+
     }
 
     parseStringContents(){
@@ -62,13 +65,6 @@ export class NotationLegend {
         this.componentContainer.remove();
     }
 
-    duplicate(){
-        const index = this.parentWorkspace.ChildObjects.indexOf(this);
-        const cloneTextbox = new TextBox(this.parentWorkspace, this.legendContainer.innerHTML);
-        this.componentContainer.insertAdjacentElement('afterend', cloneTextbox.componentContainer);
-        this.parentWorkspace.ChildObjects.splice(index + 1, 0, cloneTextbox);
-    }
-
     getRootContainer(){
         return this.componentContainer;
     }
@@ -96,41 +92,75 @@ class TechniqueEntry{
         this.componentContainer.classList.add('entry');
 
         this.symbol = _symbol.trim();
-        this.symbol += '\u00A0'.repeat(3);
-        this.symbol = this.symbol.slice(0, 3);
+        this.symbol = this.symbol.substring(0, 3);
 
-        this.description = _description
+        this.description = _description;
 
-        this.componentContainer.textContent = `| ${this.symbol} ${this.description}`
+        this.componentContainer.innerHTML=`|<span id="symbol">${this.symbol}</span><span id="description">${this.description}</span>`
+        this.symbolContainer = this.componentContainer.querySelector('#symbol');
+        this.descriptionContainer = this.componentContainer.querySelector('#description');
+
+        this.symbolContainer.contentEditable = true;
+        this.descriptionContainer.contentEditable = true;
+
+        this.componentContainer.spellcheck=false;
         
         parentObject.entriesContainer.appendChild(this.componentContainer);
+
+        this.symbolContainer.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter'){
+                event.preventDefault();
+            } else if (event.key.length > 1) {
+                return;
+            } else {
+                if (this.symbolContainer.textContent.length > 2 && !event.ctrlKey){
+                    event.preventDefault();
+                }
+                this.symbol = this.symbolContainer.textContent.trim();
+                this.symbol += event.key;
+                this.symbol = this.symbol.substring(0, 3);
+            }
+        });
+
+        this.symbolContainer.addEventListener('blur', () => {
+            this.symbolContainer.textContent = this.symbol
+        });
+
+        this.descriptionContainer.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter'){
+                event.preventDefault();
+            } else if (event.key.length > 1) {
+                return;
+            } else {
+                if (this.descriptionContainer.textContent.length > 26 && !event.ctrlKey){
+                    event.preventDefault();
+                }
+                this.description = this.descriptionContainer.textContent.trim();
+                this.description += event.key;
+                this.description = this.description.substring(0, 27);
+            }
+        });
+
+        this.symbolContainer.addEventListener('blur', () => {
+            this.symbolContainer.textContent = this.symbol
+        });
         
         this.componentContainer.addEventListener('mousedown', (event) => {
-            if (event.button == 0){
+            if (event.button == 2){
+                event.preventDefault()
                 const editEntryMenu = new TransientInput;
                 editEntryMenu.setPosition(event, null);
                 editEntryMenu.createAndAddLabel('Notation legend entry');
                 editEntryMenu.createAndAddDivisor();
-                editEntryMenu.createAndAddLabel('symbol');
-                editEntryMenu.createAndAddTextInput(this.symbol.trim(), (contents) => {
-                    if (!contents.length) { return false; };
-                    contents = contents.trim();
-                    contents += '\u00A0'.repeat(3);
-                    contents = contents.slice(0, 3);
-                    this.symbol = contents;
-                    this.componentContainer.textContent = `| ${this.symbol} ${this.description}`
+                editEntryMenu.createAndAddButton('edit text', ()=>{
+                    const target = event.target.id === 'description' ? 'description' : 'symbol';
+                    if (target === 'symbol'){
+                        this.symbolContainer.focus();
+                    } else {
+                        this.descriptionContainer.focus();
+                    }
                     return true;
-                }, /^[A-Za-z/# ]+$/);
-                editEntryMenu.createAndAddLabel('description');
-                editEntryMenu.createAndAddTextInput(this.description.trim(), (contents) => {
-                    if (!contents.length) { return false; };
-                    contents = contents.trim();
-                    contents = contents.slice(0, 20);
-                    this.description = contents;
-                    this.componentContainer.textContent = `| ${this.symbol} ${this.description}`
-                    return true;
-                }, /^[A-Za-z/# ]+$/);
-                editEntryMenu.createAndAddDivisor();
+                });
                 editEntryMenu.createAndAddButton('remove', ()=>{
                     const idx = parentObject.techniqueEntries.indexOf(this);
                     parentObject.techniqueEntries.splice(idx, 1);
@@ -160,7 +190,7 @@ class NewEntryButton{
         
         parentObject.entriesContainer.appendChild(this.componentContainer);
         
-        this.componentContainer.addEventListener('mousedown', (event) => {
+        this.componentContainer.addEventListener('mouseup', (event) => {
             if (event.button == 0){
                 parentObject.techniqueEntries.push(new TechniqueEntry(parentObject, 'PM', 'Palm Mute'));
             } else {

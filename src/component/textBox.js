@@ -4,6 +4,7 @@ export class TextBox {
     constructor(workspace, textContent = '') {
 
         this.parentWorkspace = workspace;
+        this.contextMenuOptions = [{label: 'duplicate', func: this.duplicate}, {label: 'remove', func: this.remove}];
 
         this.textContainer = document.createElement('div');
         this.textContainer.classList.add('prototypeContainer','text');

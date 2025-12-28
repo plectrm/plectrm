@@ -116,20 +116,23 @@ export class ContextMenu {
 
         dragButton.addEventListener('mousedown', (event) => {
             if (event.button == 2){
+                //get parent object's context menu options
+                const parentFuncs = parentObject.contextMenuOptions;
 
                 //open expanded context menu on right click
                 const popUpContextMenu = new TransientInput;
                 popUpContextMenu.setPosition(event, null);
                 popUpContextMenu.createAndAddLabel(parentObject.getObjectNameAsString());
                 popUpContextMenu.createAndAddDivisor();
-                popUpContextMenu.createAndAddButton('duplicate', () => {
-                    parentObject.duplicate();
-                    return true;
-                })
-                popUpContextMenu.createAndAddButton('remove', () => {
-                    parentObject.remove();
-                    return true;
-                })
+                //add parent's menu options
+                for (let i = 0; i < parentFuncs.length; i++){
+                    popUpContextMenu.createAndAddButton(parentFuncs[i].label, ()=>{
+                        const f = parentFuncs[i].func.bind(parentObject);
+                        f();
+                        return true;
+                    })
+                }
+
                 popUpContextMenu.endTransientInput();
 
 

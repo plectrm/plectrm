@@ -664,7 +664,6 @@ body{
     border: 0px;
     height: fit-content;
     align-self: center;
-    overflow: hidden;
     white-space: pre-line;
     display: flex;
     flex-direction: column;
@@ -685,19 +684,46 @@ body{
 }
 
 .entriesContainer div.entry{
-    pointer-events: all;
-    cursor: pointer;
-    background-color: transparent;
-    transition: background-color 80ms ease-in-out,
-                color 80ms ease-in-out;
+    display: flex;
+    flex-direction: row;
 }
 
 .entriesContainer div.entry:hover{
+    outline: 1px solid var(--color-light-secondary);
+}
+
+.entriesContainer div.entry:focus-within{
+    outline: 1px solid var(--color-light-secondary);
     background-color: var(--color-light-secondary);
 }
 
-.entriesContainer div.entry:active{
-    background-color: var(--color-blue);
+.entry span{
+    color: var(--color-dark-primary);
+    box-shadow: inset 0 0 10px 1px transparent;
+    pointer-events: all;
+    cursor: default;
+    background-color: transparent;
+    transition: all 80ms ease-in-out;
+    padding: 0 0.2rem;
+    user-select: text;
+    outline: 0px solid var(--color-light-primary);
+}
+
+.entry span:hover{
+    background-color: var(--color-light-secondary);
+}
+
+.entry span:focus-visible{
+    outline: 1px dashed var(--color-light-primary);
+    background-color: var(--color-light-primary);
+}
+
+.entry span#symbol{
+    width: 3rem;
+}
+
+.entry span#description{
+    width: 80%;
 }
 
 .entriesContainer div.newEntry{
