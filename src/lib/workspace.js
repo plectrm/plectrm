@@ -1,4 +1,4 @@
-import { AddTextBoxButton, AddStaveBoxButton } from "@/component/ribbon.js";
+import { AddTextBoxButton, AddStaveBoxButton, AddNotationLegendButton } from "@/component/ribbon.js";
 import { exportFile } from '@/lib/exportFile.js';
 
 export class Workspace {
@@ -14,6 +14,7 @@ export class Workspace {
 
         AddTextBoxButton(ribbon, this);
         AddStaveBoxButton(ribbon, this);
+        AddNotationLegendButton(ribbon, this);
 
         exportButton.onclick = () => {
             let textBuffer = ``;

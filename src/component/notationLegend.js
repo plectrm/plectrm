@@ -33,29 +33,17 @@ export class NotationLegend {
     }
 
     parseStringContents(){
-        let xmlMarkupString = this.legendContainer.innerHTML;
-        let outputMarkup = "";
-        
-        
-        function parseTags(prevOpen, prevClose){
-            let openTag = xmlMarkupString.indexOf('<div>', prevOpen + 1);
-            let closeTag = xmlMarkupString.indexOf('</div>', prevClose + 1);
-            if (openTag > 0 && closeTag > 0){
-                outputMarkup += `${xmlMarkupString.slice(openTag + 5, closeTag)}\n`
-                parseTags(openTag, closeTag)
-            }
-            return;
+        let textBuffer = "";
+        textBuffer += '***********************************\n';
+        const entries = this.techniqueEntries
+        for (let i = 0; i < entries.length; i++){
+            let symbol = entries[i].symbol.trim();
+            symbol += ' '.repeat(4)
+            symbol = symbol.substring(0, 4);
+            let description = entries[i].description.trim();
+            textBuffer += `|${symbol}${description}\n`;
         }
-        
-        let linebreak = xmlMarkupString.indexOf('<div>');
-        if (linebreak > 0){
-            outputMarkup += `${xmlMarkupString.slice(0, linebreak)}\n`
-            parseTags(-1, -1)
-        } else {
-            outputMarkup = `${xmlMarkupString.trimEnd()}\n`;
-        }
-
-        const textBuffer = outputMarkup;
+        textBuffer += '***********************************\n';
         return textBuffer;
     }
 

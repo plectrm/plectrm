@@ -686,14 +686,10 @@ body{
 .entriesContainer div.entry{
     display: flex;
     flex-direction: row;
-}
-
-.entriesContainer div.entry:hover{
-    outline: 1px solid var(--color-light-secondary);
+    transition: all 80ms ease-in-out;
 }
 
 .entriesContainer div.entry:focus-within{
-    outline: 1px solid var(--color-light-secondary);
     background-color: var(--color-light-secondary);
 }
 
@@ -703,7 +699,6 @@ body{
     pointer-events: all;
     cursor: default;
     background-color: transparent;
-    transition: all 80ms ease-in-out;
     padding: 0 0.2rem;
     user-select: text;
     outline: 0px solid var(--color-light-primary);
@@ -714,8 +709,9 @@ body{
 }
 
 .entry span:focus-visible{
-    outline: 1px dashed var(--color-light-primary);
+    outline: 1px dashed var(--color-light-secondary);
     background-color: var(--color-light-primary);
+    cursor: auto;
 }
 
 .entry span#symbol{
