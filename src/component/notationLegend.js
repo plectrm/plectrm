@@ -18,6 +18,7 @@ export class NotationLegend {
         this.legendContainer.innerHTML += '<div class="divider">***********************************</div><div class="entriesContainer"></div><div class="divider">***********************************</div>';
 
         this.entriesContainer = this.legendContainer.querySelector('.entriesContainer');
+        new NewEntryButton(this);
 
         this.techniqueEntries = [];
 
@@ -105,10 +106,10 @@ class TechniqueEntry{
         parentObject.entriesContainer.appendChild(this.componentContainer);
         
         this.componentContainer.addEventListener('mousedown', (event) => {
-            if (event.button == 2){
+            if (event.button == 0){
                 const editEntryMenu = new TransientInput;
                 editEntryMenu.setPosition(event, null);
-                editEntryMenu.createAndAddLabel('Notation Legend');
+                editEntryMenu.createAndAddLabel('Notation legend entry');
                 editEntryMenu.createAndAddDivisor();
                 editEntryMenu.createAndAddLabel('symbol');
                 editEntryMenu.createAndAddTextInput(this.symbol.trim(), (contents) => {
@@ -137,6 +138,31 @@ class TechniqueEntry{
                     return true;
                 });
                 editEntryMenu.endTransientInput();
+            } else {
+
+            }
+        })
+
+    }
+
+    remove(){
+        this.componentContainer.remove();
+    }
+}
+
+class NewEntryButton{
+    constructor(parentObject){
+        this.componentContainer = document.createElement('div');
+        this.componentContainer.classList.add('newEntry');
+
+        this.componentContainer.textContent = '+ Add Entry';
+        this.componentContainer.title = "Add Entry";
+        
+        parentObject.entriesContainer.appendChild(this.componentContainer);
+        
+        this.componentContainer.addEventListener('mousedown', (event) => {
+            if (event.button == 0){
+                parentObject.techniqueEntries.push(new TechniqueEntry(parentObject, 'PM', 'Palm Mute'));
             } else {
 
             }

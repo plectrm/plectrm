@@ -669,6 +669,7 @@ body{
     display: flex;
     flex-direction: column;
     user-select: none;
+    transition: all 80ms ease-in-out;
 }
 
 .notationLegend div.divider{
@@ -680,17 +681,51 @@ body{
     min-height: 1em;
     display: flex;
     flex-direction: column;
+    transition: all 80ms ease-in-out;
 }
 
 .entriesContainer div.entry{
     pointer-events: all;
+    cursor: pointer;
     background-color: transparent;
-    transition: background-color 80ms ease-in-out
+    transition: background-color 80ms ease-in-out,
+                color 80ms ease-in-out;
 }
 
 .entriesContainer div.entry:hover{
     background-color: var(--color-light-secondary);
 }
+
+.entriesContainer div.entry:active{
+    background-color: var(--color-blue);
+}
+
+.entriesContainer div.newEntry{
+    order: 999;
+    pointer-events: all;
+    cursor: pointer;
+    background-color: transparent;
+    color: transparent;
+    transition: all 80ms ease-in-out;
+    height: 0px;
+}
+
+.notationLegend:hover div.newEntry{
+    pointer-events: all;
+    cursor: pointer;
+    color: var(--color-light-secondary);
+    height: 1.1rem;
+}
+
+.entriesContainer div.newEntry:hover{
+    color: var(--color-light-primary);
+    background-color: var(--color-light-secondary);
+}
+
+.entriesContainer div.newEntry:active{
+    background-color: var(--color-blue);
+}
+
 
 .transientInputContainer{
     display: flex;
