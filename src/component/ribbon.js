@@ -63,7 +63,7 @@ export function AddStaveBoxButton(_ribbon, workspace){
 export function AddNotationLegendButton(_ribbon, workspace){
     const notationButton = document.createElement('button');
     notationButton.classList.add('ribbonButton');
-    notationButton.innerHTML = window.electronAPI.getIcon('addText');
+    notationButton.innerHTML = window.electronAPI.getIcon('addNotation');
     notationButton.title = "Add Notation Legend";
     notationButton.onclick = function(){
         workspace.ChildObjects.push(new NotationLegend(workspace))
