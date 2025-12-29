@@ -120,8 +120,7 @@ export class ContextMenu {
                 const parentFuncs = parentObject.contextMenuOptions;
 
                 //open expanded context menu on right click
-                const popUpContextMenu = new TransientInput;
-                popUpContextMenu.setPosition(event, null);
+                const popUpContextMenu = new TransientInput(dragButton, {x: event.pageX,y: event.pageY});
                 popUpContextMenu.createAndAddLabel(parentObject.getObjectNameAsString());
                 popUpContextMenu.createAndAddDivisor();
                 //add parent's menu options
@@ -132,7 +131,7 @@ export class ContextMenu {
                         return true;
                     })
                 }
-
+                
                 popUpContextMenu.endTransientInput();
 
 
