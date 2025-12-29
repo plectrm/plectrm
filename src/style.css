@@ -326,6 +326,10 @@ body{
     grid-template-columns: 2em auto;
 }
 
+.prototypeContainer.legend{
+    grid-template-columns: 2em auto;
+}
+
 .prototypeContainer:hover .contextMenu{
     opacity: 100%;
 }
@@ -650,6 +654,100 @@ body{
 .textBox:focus-visible{
     outline: 0;
 }
+
+.notationLegend{
+    margin: 0 0.3rem;
+    font-family: 'FantasqueSansMono', monospace;
+    min-height: 1em;
+    min-width: 8em;
+    background-color: transparent;
+    border: 0px;
+    height: fit-content;
+    align-self: center;
+    white-space: pre-line;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    transition: all 80ms ease-in-out;
+}
+
+.notationLegend div.divider{
+    height: 100%;
+    width: 100%;
+}
+
+.notationLegend div.entriesContainer{
+    min-height: 1em;
+    display: flex;
+    flex-direction: column;
+    transition: all 80ms ease-in-out;
+}
+
+.entriesContainer div.entry{
+    display: flex;
+    flex-direction: row;
+    transition: all 80ms ease-in-out;
+}
+
+.entriesContainer div.entry:focus-within{
+    background-color: var(--color-light-secondary);
+}
+
+.entry span{
+    color: var(--color-dark-primary);
+    box-shadow: inset 0 0 10px 1px transparent;
+    pointer-events: all;
+    cursor: default;
+    background-color: transparent;
+    padding: 0 0.2rem;
+    user-select: text;
+    outline: 0px solid var(--color-light-primary);
+}
+
+.entry span:hover{
+    background-color: var(--color-light-secondary);
+}
+
+.entry span:focus-visible{
+    outline: 1px dashed var(--color-light-secondary);
+    background-color: var(--color-light-primary);
+    cursor: auto;
+}
+
+.entry span#symbol{
+    width: 3rem;
+}
+
+.entry span#description{
+    width: 80%;
+}
+
+.entriesContainer div.newEntry{
+    order: 999;
+    pointer-events: all;
+    cursor: pointer;
+    background-color: transparent;
+    color: transparent;
+    transition: all 80ms ease-in-out;
+    height: 0px;
+}
+
+.notationLegend:hover div.newEntry{
+    pointer-events: all;
+    cursor: pointer;
+    color: var(--color-light-secondary);
+    height: 1.1rem;
+}
+
+.entriesContainer div.newEntry:hover{
+    color: var(--color-light-primary);
+    background-color: var(--color-light-secondary);
+}
+
+.entriesContainer div.newEntry:active{
+    background-color: var(--color-blue);
+}
+
 
 .transientInputContainer{
     display: flex;

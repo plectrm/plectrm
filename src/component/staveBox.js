@@ -28,6 +28,7 @@ export class StaveBox {
         this.cellArray = [];
         this.cellArray.hasFocus = false;
         this.parentWorkspace = workspace;
+        this.contextMenuOptions = [{label: 'duplicate', func: this.duplicate}, {label: 'remove', func: this.remove}];
 
         const Direction = {
             Horizontal: 'Horizontal',
@@ -54,6 +55,7 @@ export class StaveBox {
         this.staveEnd = document.createElement('div');
         this.staveEnd.classList.add('staveEnd');
         this.staveEnd.textContent = '|\r'.repeat(this.localTuning.length);
+
 
         this.staveEnd.addEventListener('mousedown', (event) => {
             document.addEventListener('mouseup', () => {

@@ -1,5 +1,6 @@
 import { TextBox } from "@/component/textBox.js";
 import { StaveBox } from "@/component/staveBox.js";
+import { NotationLegend } from "@/component/notationLegend.js";
 import { TransientInput } from "@/lib/transientInput.js";
 
 export function AddTextBoxButton (_ribbon, workspace){
@@ -57,4 +58,15 @@ export function AddStaveBoxButton(_ribbon, workspace){
     staveBoxContainer.appendChild(staveBoxButton);
     staveBoxContainer.appendChild(staveBoxDropdown);
     _ribbon.appendChild(staveBoxContainer);
+}
+
+export function AddNotationLegendButton(_ribbon, workspace){
+    const notationButton = document.createElement('button');
+    notationButton.classList.add('ribbonButton');
+    notationButton.innerHTML = window.electronAPI.getIcon('addNotation');
+    notationButton.title = "Add Notation Legend";
+    notationButton.onclick = function(){
+        workspace.ChildObjects.push(new NotationLegend(workspace))
+    };
+    _ribbon.appendChild(notationButton);
 }
