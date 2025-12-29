@@ -347,8 +347,7 @@ export class StaveBox {
         this.drawGrid(this.staveBoxGrid, this.cellArray);
 
         const openTuningMenu = (mouseEvent) => {
-            const popUpContextMenu = new TransientInput;
-            popUpContextMenu.setPosition(mouseEvent, null);
+            const popUpContextMenu = new TransientInput(this.stringLabels, {x: mouseEvent.pageX,y: mouseEvent.pageY});
             popUpContextMenu.createAndAddLabel('Tuning:');
             popUpContextMenu.createAndAddTextInput(this.localTuning.join('/'), (contents) => {
             if (!contents.includes('/')) { return false; };
@@ -434,8 +433,7 @@ export class StaveBox {
                 if (ev.button != 2) { return; }
                 ev.preventDefault();
 
-                const popUpContextMenu = new TransientInput;
-                popUpContextMenu.setPosition(ev, null);
+                const popUpContextMenu = new TransientInput(this.staveArticulationContainer, {x: ev.pageX,y: ev.pageY});
                 popUpContextMenu.createAndAddLabel('Stave Articulation');
                 popUpContextMenu.createAndAddDivisor()
                 popUpContextMenu.createAndAddButton('clear', (ev) => {

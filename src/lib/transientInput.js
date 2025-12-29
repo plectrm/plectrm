@@ -1,20 +1,25 @@
 export class TransientInput {
-    constructor() {
+    constructor(target = document.body, pos = {x: 0, y: 0}) {
         if (document.getElementsByClassName('transientInputContainer').length){
             for (let element of document.getElementsByClassName('transientInputContainer')){
                 element.remove();
             }
         }
+        this.target = target;
         this.transientInputContainer = document.createElement('div');
         this.transientInputContainer.classList.add('transientInputContainer');
         document.body.appendChild(this.transientInputContainer);
 
+        this.transientInputContainer.style.transform = `translate(${this.x}px, ${this.y}px)`;
+
         this.callbackList = [];
 
-        this.x = 0;
-        this.y = 0;
+        this.x = pos.x;
+        this.y = pos.y;
+
 
         const clickHandler = (_event) => {
+            _event.preventDefault();
             if (!this.transientInputContainer.contains(_event.target)){
                 this.transientInputContainer.remove();
                 document.removeEventListener('mousedown', clickHandler)}
@@ -24,19 +29,6 @@ export class TransientInput {
             document.addEventListener('mousedown', clickHandler)
         }, 0);
 
-
-    }
-
-    setPosition(mouseEvent = null, positionOverride = null){
-        if (mouseEvent){
-            this.x = mouseEvent.pageX;
-            this.y = mouseEvent.pageY;
-        } else if (positionOverride) {
-            this.x = positionOverride.x;
-            this.y = positionOverride.y;
-        }
-
-        this.transientInputContainer.style.transform = `translate(${this.x}px, ${this.y}px)`;
 
     }
 
@@ -126,12 +118,19 @@ export class TransientInput {
         transientInputEnd.classList.add('transientItem', 'end');
         this.transientInputContainer.appendChild(transientInputEnd);
         const rect = this.transientInputContainer.getBoundingClientRect();
-        if (rect.top > 0 && rect.left > 0 && rect.bottom < window.innerHeight && rect.right < window.innerWidth){
-
+        //10px margin
+        const margin = 10;
+        const top = (this.y) < (0 + margin);
+        const left = (this.x) < (0 + margin);
+        const right = (this.x + rect.width) > (window.innerWidth - margin);
+        const bottom = (this.y + rect.height) > (window.innerHeight - margin);
+        if (bottom){
+            this.transientInputContainer.style.transform = `translate(${this.x}px, ${this.y - rect.height}px)`;
         } else {
-            const yOffset = rect.height;
-            this.transientInputContainer.style.transform = `translate(${this.x}px, ${this.y - yOffset}px)`;
+            this.transientInputContainer.style.transform = `translate(${this.x}px, ${this.y}px)`;
         };
+
+        this.target.focus({focusVisible: true});
     }
 
 }

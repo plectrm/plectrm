@@ -32,10 +32,8 @@ export function AddStaveBoxButton(_ribbon, workspace){
     staveBoxDropdown.innerHTML = window.electronAPI.getIcon('collapse');
     staveBoxDropdown.title = "StaveBox Options"
     staveBoxDropdown.onclick = function(){
-        const staveBoxOptionsMenu = new TransientInput();
         const buttonRect = staveBoxDropdown.getBoundingClientRect();
-        const cornerPosition = {x: buttonRect.left, y: buttonRect.top};
-        staveBoxOptionsMenu.setPosition(null, cornerPosition);
+        const staveBoxOptionsMenu = new TransientInput(staveBoxDropdown, {x: buttonRect.left, y: buttonRect.top});
         staveBoxOptionsMenu.createAndAddLabel('StaveBox settings');
         staveBoxOptionsMenu.createAndAddDivisor();
         staveBoxOptionsMenu.createAndAddLabel('tuning');

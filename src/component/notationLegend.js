@@ -136,8 +136,7 @@ class TechniqueEntry{
         this.componentContainer.addEventListener('mousedown', (event) => {
             if (event.button == 2){
                 event.preventDefault()
-                const editEntryMenu = new TransientInput;
-                editEntryMenu.setPosition(event, null);
+                const editEntryMenu = new TransientInput(this.componentContainer, {x: event.pageX,y: event.pageY});
                 editEntryMenu.createAndAddLabel('Notation legend entry');
                 editEntryMenu.createAndAddDivisor();
                 editEntryMenu.createAndAddButton('edit text', ()=>{
