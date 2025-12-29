@@ -35,7 +35,6 @@ export function initStartscreen(foreground, workspace) {
         newProjectButton.addEventListener('click', () => {
             workspace.ChildObjects.push(new TextBox(workspace));
             workspace.ChildObjects.push(new StaveBox(workspace, 24, 'E/A/D/G/B/e/'));
-            workspace.ChildObjects.push(new NotationLegend(workspace));
             foreground.active(false);
             startscreenContainer.classList.toggle('hidden', true);
             setTimeout(() => { startscreenContainer.remove() }, 500)
