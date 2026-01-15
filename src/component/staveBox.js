@@ -58,16 +58,21 @@ export class StaveBox {
 
 
         this.staveEnd.addEventListener('mousedown', (event) => {
+            
+            this.lengthHelper = new TransientInput(event.target, {x: event.clientX, y: event.clientY});
+            this.lengthHelper.createAndAddLabel('length');
+            this.lengthHelper.createAndAddLabel(`${this.gridWidth}`);
+            this.lengthHelper.endTransientInput();
+
+            document.addEventListener('mousemove', this.resizeHandler)
+            this.staveEnd.focus();
+            this.staveEnd.classList.add('focus');
+            
             document.addEventListener('mouseup', () => {
                 document.body.style.cursor = 'auto';
                 this.staveEnd.classList.remove('focus');
                 document.removeEventListener('mousemove', this.resizeHandler)
             })
-
-            document.addEventListener('mousemove', this.resizeHandler)
-            this.staveEnd.focus();
-            this.staveEnd.classList.add('focus');
-
 
         });
         this.staveBox.appendChild(this.staveEnd);
@@ -581,6 +586,8 @@ export class StaveBox {
         const cellWidth = gridRect.width / this.gridWidth;
         const tempWidth = Math.max(parseInt((mouseX - gridRect.left) / cellWidth), 1);
         document.body.style.cursor = 'col-resize';
+
+        this.lengthHelper.draw({x: event.clientX, y: event.clientY});
 
         if (tempWidth != this.gridWidth){
 

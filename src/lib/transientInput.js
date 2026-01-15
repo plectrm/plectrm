@@ -19,8 +19,8 @@ export class TransientInput {
 
 
         const clickHandler = (_event) => {
-            _event.preventDefault();
             if (!this.transientInputContainer.contains(_event.target)){
+                _event.preventDefault();
                 this.transientInputContainer.remove();
                 document.removeEventListener('mousedown', clickHandler)}
         }
@@ -44,12 +44,21 @@ export class TransientInput {
         })
     }
 
-    createAndAddLabel(textLabel) {
+    createAndAddLabel(textValue, dynamic = false) {
+        let textString = ''
+        if (typeof(textValue) == "string"){
+            textString = textValue;
+        } else {
+            textString = toString(textValue);
+        }
         const transientLabel = document.createElement('div');
         transientLabel.classList.add('transientItem', 'transientLabel');
-        transientLabel.textContent = textLabel;
+        transientLabel.textContent = textString;
         this.transientInputContainer.appendChild(transientLabel);
 
+        if (dynamic){
+            this.callbackList.push({fn: null, param: null, el: transientLabel});
+        }
     }
 
     createAndAddTextInput(initialText, submitFn, regex = /[\s\S]*/) {
@@ -131,6 +140,22 @@ export class TransientInput {
         };
 
         this.target.focus({focusVisible: true});
+    }
+
+    draw(pos = {x: 0, y: 0}){
+        this.x = pos.x;
+        this.y = pos.y;
+        const rect = this.transientInputContainer.getBoundingClientRect();
+        const margin = 10;
+        const top = (this.y) < (0 + margin);
+        const left = (this.x) < (0 + margin);
+        const right = (this.x + rect.width) > (window.innerWidth - margin);
+        const bottom = (this.y + rect.height) > (window.innerHeight - margin);
+        if (bottom){
+            this.transientInputContainer.style.transform = `translate(${this.x}px, ${this.y - rect.height}px)`;
+        } else {
+            this.transientInputContainer.style.transform = `translate(${this.x}px, ${this.y}px)`;
+        };
     }
 
 }
