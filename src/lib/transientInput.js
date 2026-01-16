@@ -18,15 +18,16 @@ export class TransientInput {
         this.y = pos.y;
 
 
-        const clickHandler = (_event) => {
-            _event.preventDefault();
+        this.clickHandler = (_event) => {
             if (!this.transientInputContainer.contains(_event.target)){
+                _event.preventDefault();
                 this.transientInputContainer.remove();
-                document.removeEventListener('mousedown', clickHandler)}
+                document.removeEventListener('mousedown', this.clickHandler)
+            }
         }
 
         setTimeout(()=>{
-            document.addEventListener('mousedown', clickHandler)
+            document.addEventListener('mousedown', this.clickHandler)
         }, 0);
 
 
@@ -44,12 +45,20 @@ export class TransientInput {
         })
     }
 
-    createAndAddLabel(textLabel) {
+    createAndAddLabel(textValue,) {
         const transientLabel = document.createElement('div');
         transientLabel.classList.add('transientItem', 'transientLabel');
-        transientLabel.textContent = textLabel;
-        this.transientInputContainer.appendChild(transientLabel);
 
+        let getValue;
+        if (typeof textValue === 'function') {
+            getValue = textValue;
+            this.callbackList.push({fn: null, param: getValue, el: transientLabel});
+        } else {
+            getValue = () => textValue;
+        }
+
+        transientLabel.textContent = getValue();
+        this.transientInputContainer.appendChild(transientLabel);
     }
 
     createAndAddTextInput(initialText, submitFn, regex = /[\s\S]*/) {
@@ -131,6 +140,33 @@ export class TransientInput {
         };
 
         this.target.focus({focusVisible: true});
+    }
+
+    draw(pos = {x: 0, y: 0}){
+        this.x = pos.x;
+        this.y = pos.y;
+        const rect = this.transientInputContainer.getBoundingClientRect();
+        const margin = 10;
+        const top = (this.y) < (0 + margin);
+        const left = (this.x) < (0 + margin);
+        const right = (this.x + rect.width) > (window.innerWidth - margin);
+        const bottom = (this.y + rect.height) > (window.innerHeight - margin);
+        if (bottom){
+            this.transientInputContainer.style.transform = `translate(${this.x}px, ${this.y - rect.height}px)`;
+        } else {
+            this.transientInputContainer.style.transform = `translate(${this.x}px, ${this.y}px)`;
+        };
+
+        this.callbackList.forEach(({fn, param, el}) => {
+          if (el.classList.contains('transientLabel')) {
+            el.textContent = typeof param === 'function' ? param() : param;
+          }
+        });
+    }
+
+    remove(){
+        this.transientInputContainer.remove();
+        document.removeEventListener('mousedown', this.clickHandler)
     }
 
 }
