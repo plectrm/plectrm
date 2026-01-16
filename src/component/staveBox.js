@@ -59,9 +59,11 @@ export class StaveBox {
 
         this.staveEnd.addEventListener('mousedown', (event) => {
             
-            this.lengthHelper = new TransientInput(event.target, {x: event.clientX, y: event.clientY});
+            const rect = this.staveContainer.getBoundingClientRect();
+
+            this.lengthHelper = new TransientInput(event.target, {x: rect.right, y: rect.bottom});
             this.lengthHelper.createAndAddLabel('length');
-            this.lengthHelper.createAndAddLabel(`${this.gridWidth}`);
+            this.lengthHelper.createAndAddLabel(() => `${this.gridWidth}`);
             this.lengthHelper.endTransientInput();
 
             document.addEventListener('mousemove', this.resizeHandler)
@@ -72,6 +74,7 @@ export class StaveBox {
                 document.body.style.cursor = 'auto';
                 this.staveEnd.classList.remove('focus');
                 document.removeEventListener('mousemove', this.resizeHandler)
+                this.lengthHelper.remove();
             })
 
         });
@@ -587,7 +590,6 @@ export class StaveBox {
         const tempWidth = Math.max(parseInt((mouseX - gridRect.left) / cellWidth), 1);
         document.body.style.cursor = 'col-resize';
 
-        this.lengthHelper.draw({x: event.clientX, y: event.clientY});
 
         if (tempWidth != this.gridWidth){
 
@@ -598,6 +600,7 @@ export class StaveBox {
             };
 
             if (tempWidth < this.gridWidth){
+
                 for (let row = 0; row < tempCellArray.length; row++){
                     tempCellArray[row] = tempCellArray[row].slice(0, tempWidth - this.gridWidth);
                     if (this.articulationCellArray.length) {
@@ -607,7 +610,9 @@ export class StaveBox {
                         this.articulationCellArray = tempArtCells;
                     };
                 };
+
             } else if (tempWidth > this.gridWidth){
+
                 for (let row = 0; row < tempCellArray.length; row++){
                     const size = tempWidth - this.gridWidth;
                     const diffArray = Array.from({ length: size }, () => ({ textContent: '-' }));
@@ -619,6 +624,7 @@ export class StaveBox {
                         this.staveArticulationContainer.style.gridTemplateColumns = `repeat(${tempWidth}, ${this.parentWorkspace.emSize.width}px)`;
                     }
                 };
+
             }
 
             tempCellArray = tempCellArray.flat()
@@ -633,6 +639,9 @@ export class StaveBox {
             };
 
             this.drawGrid(this.staveBoxGrid);
+
+            const rect = this.staveContainer.getBoundingClientRect();
+            this.lengthHelper.draw({x: rect.right, y: rect.bottom})
         }
     }
 

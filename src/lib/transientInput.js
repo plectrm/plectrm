@@ -18,15 +18,16 @@ export class TransientInput {
         this.y = pos.y;
 
 
-        const clickHandler = (_event) => {
+        this.clickHandler = (_event) => {
             if (!this.transientInputContainer.contains(_event.target)){
                 _event.preventDefault();
                 this.transientInputContainer.remove();
-                document.removeEventListener('mousedown', clickHandler)}
+                document.removeEventListener('mousedown', this.clickHandler)
+            }
         }
 
         setTimeout(()=>{
-            document.addEventListener('mousedown', clickHandler)
+            document.addEventListener('mousedown', this.clickHandler)
         }, 0);
 
 
@@ -44,21 +45,20 @@ export class TransientInput {
         })
     }
 
-    createAndAddLabel(textValue, dynamic = false) {
-        let textString = ''
-        if (typeof(textValue) == "string"){
-            textString = textValue;
-        } else {
-            textString = toString(textValue);
-        }
+    createAndAddLabel(textValue,) {
         const transientLabel = document.createElement('div');
         transientLabel.classList.add('transientItem', 'transientLabel');
-        transientLabel.textContent = textString;
-        this.transientInputContainer.appendChild(transientLabel);
 
-        if (dynamic){
-            this.callbackList.push({fn: null, param: null, el: transientLabel});
+        let getValue;
+        if (typeof textValue === 'function') {
+            getValue = textValue;
+            this.callbackList.push({fn: null, param: getValue, el: transientLabel});
+        } else {
+            getValue = () => textValue;
         }
+
+        transientLabel.textContent = getValue();
+        this.transientInputContainer.appendChild(transientLabel);
     }
 
     createAndAddTextInput(initialText, submitFn, regex = /[\s\S]*/) {
@@ -156,6 +156,17 @@ export class TransientInput {
         } else {
             this.transientInputContainer.style.transform = `translate(${this.x}px, ${this.y}px)`;
         };
+
+        this.callbackList.forEach(({fn, param, el}) => {
+          if (el.classList.contains('transientLabel')) {
+            el.textContent = typeof param === 'function' ? param() : param;
+          }
+        });
+    }
+
+    remove(){
+        this.transientInputContainer.remove();
+        document.removeEventListener('mousedown', this.clickHandler)
     }
 
 }
