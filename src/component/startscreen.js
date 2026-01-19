@@ -1,6 +1,6 @@
 import { StaveBox } from "@/component/staveBox";
+import { StaveBox2 } from "@/component/staveBox2";
 import { TextBox } from "@/component/textBox";
-import { NotationLegend } from "@/component/notationLegend";
 import { requestImportFile } from "@/lib/importFile";
 
 export function initStartscreen(foreground, workspace) {
@@ -34,7 +34,8 @@ export function initStartscreen(foreground, workspace) {
 
         newProjectButton.addEventListener('click', () => {
             workspace.ChildObjects.push(new TextBox(workspace));
-            workspace.ChildObjects.push(new StaveBox(workspace, 24, 'E/A/D/G/B/e/'));
+            workspace.ChildObjects.push(new StaveBox(workspace, 24, 'E/A/D/G/B/e'));
+            workspace.ChildObjects.push(new StaveBox2(workspace, ['E', 'A', 'D', 'G', 'B', 'e']));
             foreground.active(false);
             startscreenContainer.classList.toggle('hidden', true);
             setTimeout(() => { startscreenContainer.remove() }, 500)
