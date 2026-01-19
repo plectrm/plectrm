@@ -449,9 +449,30 @@ body{
     grid-column: 2;
     grid-row: 1;
     height: 100%;
-    width: fit-content;
     padding: 0.1rem 0;
     gap: 0px 0px;
+    line-height: 1em;
+    white-space: pre;
+    user-select: none;
+    font-size: 1em;
+    font-weight: bold;
+    letter-spacing: 0.5em;
+}
+
+.cellHighlight{
+    position: absolute;
+    white-space: normal;
+    width: 1em;
+    height: 1em;
+    background-color: var(--color-light-secondary);
+    color: var(--color-light-primary);
+    opacity: 0%;
+    text-align: center;
+    outline: 2px solid var(--color-light-secondary);
+}
+
+.staveGrid:hover div.cellHighlight{
+    opacity: 100%;
 }
 
 .staveGridCell{
@@ -517,7 +538,6 @@ body{
     background-color: transparent;
     text-align: center;
     align-content: center;
-    padding: 0.2rem 0 0 0;
     border-radius: 0rem 0.5rem 0.5rem 0rem;
 }
 
