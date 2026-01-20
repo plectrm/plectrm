@@ -138,7 +138,7 @@ function initCellArray(x, y, cloneArray = []){
         for (let col = 0; col < x; col++){
             const idx = (x * row) + (col);
             const value = cloneArray[idx] ? cloneArray[i] : '-';
-            rowArray.push({idx: idx, value: '-'})
+            rowArray.push({idx: idx, value: value})
         }
         cellArray.push(rowArray)
     }
@@ -188,6 +188,10 @@ class staveGrid {
         this.el.directionHighlight.classList.add('cellDirection');
         this.el.baseContainer.appendChild(this.el.directionHighlight);
 
+        this.el.activeHighlight = document.createElement('div');
+        this.el.activeHighlight.classList.add('cellActive');
+        this.el.baseContainer.appendChild(this.el.activeHighlight);
+
         // handle hover events
         this.el.baseContainer.addEventListener('mousemove', (event) => {
             if (event.target !== this.el.baseContainer) { return; }
@@ -222,12 +226,47 @@ class staveGrid {
                 this.draw();
             }
         })
+
+        document.body.addEventListener('mousedown', (event) => {
+            if (this.el.baseContainer.contains(event.target)){ return; };
+            this.mouseState.focus = false;
+            this.draw();
+        })
+
+        // handle keyboard events
+        document.body.addEventListener('keydown', (event) => {
+            if (!this.mouseState.focus) { return; };
+            event.preventDefault();
+
+            const key = event.code;
+
+            if (key === 'Space'){
+                this.mouseState.inputDirection = this.mouseState.inputDirection == Direction.Vertical ? Direction.Horizontal : Direction.Vertical; 
+            } else if (key.includes('Key') || key.includes('Digit')){
+                // if key pressed is a valid cell value then change its contents
+                const character = event.key;
+                const idx = (this.mouseState.lastClicked.y * this.staveBox.length) + (this.mouseState.lastClicked.x);
+
+                this.setCell(this.mouseState.lastClicked.x, this.mouseState.lastClicked.y, character);
+
+                if ( this.mouseState.inputDirection == Direction.Vertical ){
+                    let nextIdx = idx - this.staveBox.length;
+                    if (!nextIdx >= 0){
+                        
+                    }
+                }
+                console.log(idx);
+            }
+
+            this.draw();
+        })
     }
 
     draw(){
         if (this.mouseState.focus){
-            this.el.baseContainer.focus();
+            this.el.activeHighlight.focus();
 
+            // render direction highlight
             if (this.mouseState.inputDirection == Direction.Horizontal){
                 const cells = this.staveBox.cellArray[this.mouseState.lastClicked.y];
                 let content = "";
@@ -254,7 +293,33 @@ class staveGrid {
                 this.el.directionHighlight.style.letterSpacing = 'normal';
                 this.el.directionHighlight.style.transform = `translate(${(this.mouseState.lastClicked.x * (this.parentWorkspace.emSize.width * 1))}px, 2px)`
             }
+
+            // render selected cell
+            const content = this.staveBox.cellArray[this.mouseState.lastClicked.y][this.mouseState.lastClicked.x].value;
+            this.el.activeHighlight.textContent = content;
+            this.el.activeHighlight.style.transform = `translate(${this.mouseState.lastClicked.x * this.parentWorkspace.emSize.width}px, ${this.mouseState.lastClicked.y * (this.parentWorkspace.emSize.height * 1.05)}px)`;
+        } else {
+
         }
+    }
+
+    /**
+     * Sets a specific cell in a staveGrid to a given value.
+     * @param {number} x - Y position of cell to change.
+     * @param {number} y - Y position of cell to change.
+     * @param {string} value - New value for cell.
+     */
+    setCell(x, y, value){
+        this.staveBox.cellArray[y][x].value = value;
+        const arr = this.staveBox.cellArray.flat(1);
+        let contents = "";
+        arr.forEach((cell, idx) => {
+            contents += cell.value.trim();
+            if (idx % this.staveBox.cellArray[0].length === (this.staveBox.cellArray[0].length - 1)){
+                contents += `\n`;
+            }
+        })
+        this.el.baseContainer.firstChild.nodeValue = contents;
     }
 }
 
