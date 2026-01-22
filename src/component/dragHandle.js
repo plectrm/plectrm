@@ -1,6 +1,6 @@
 import { TransientInput } from "@/lib/transientInput.js";
 
-export class ContextMenu {
+export class DragHandle {
     constructor(parentObject, workspace) {
         const parentContainer = parentObject.getRootContainer();
         const contextMenu = document.createElement('div');

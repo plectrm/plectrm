@@ -1,4 +1,4 @@
-import { ContextMenu } from "@/component/contextMenu.js";
+import { DragHandle } from "@/component/dragHandle.js";
 import { TransientInput } from "@/lib/transientInput.js";
 
 export class NotationLegend {
@@ -11,7 +11,7 @@ export class NotationLegend {
         this.componentContainer.classList.add('prototypeContainer','legend');
         this.parentWorkspace.el.appendChild(this.componentContainer);
         
-        const contextMenu = new ContextMenu(this, this.parentWorkspace);
+        const contextMenu = new DragHandle(this, this.parentWorkspace);
         this.componentContainer.appendChild(contextMenu);
 
         this.legendContainer = document.createElement('div');

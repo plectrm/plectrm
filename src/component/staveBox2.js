@@ -1,4 +1,4 @@
-import { ContextMenu } from "@/component/contextMenu.js";
+import { DragHandle } from "@/component/dragHandle.js";
 import { TransientInput } from "@/lib/transientInput.js";
 
 export class StaveBox2 {
@@ -29,7 +29,7 @@ export class StaveBox2 {
         this.el.baseContainer.classList.add('prototypeContainer','stave');
         this.parentWorkspace.el.appendChild(this.el.baseContainer);
 
-        this.el.contextMenu = new ContextMenu(this, this.parentWorkspace);
+        this.el.contextMenu = new DragHandle(this, this.parentWorkspace);
         this.el.baseContainer.appendChild(this.el.contextMenu);
 
         this.el.staveBox = document.createElement('div');
