@@ -242,15 +242,17 @@ class staveGrid {
             const key = event.code;
 
             if (key === 'Space'){
+                // switch input direction
                 this.state.inputDirection = this.state.inputDirection == Direction.Vertical ? Direction.Horizontal : Direction.Vertical; 
-            } else if (key.includes('Key') || key.includes('Digit')){
-                // if key pressed is a valid cell value then change its contents
-                const character = event.key;
+            } else if (key === 'Backspace') {
+                this.setCell(this.state.activeCell.x, this.state.activeCell.y, '-');
 
-                this.setCell(this.state.activeCell.x, this.state.activeCell.y, character);
-
-                this.advancePointer();
+            // holding alt while backspacing should not move pointer
+                if (!event.altKey) { this.retreatPointer(); }; 
+                
             } else if (key.includes('Arrow')){
+                // move pointer
+                const previousInputDirection = this.state.inputDirection;
                 switch (key) {
                     case "ArrowUp":
                         this.state.inputDirection = Direction.Vertical;
@@ -271,6 +273,18 @@ class staveGrid {
                     default:
                         break;
                 }
+
+                // holding alt while traversing should move without changing input direction
+                if (event.altKey){ this.state.inputDirection = previousInputDirection }
+            } else if (key.includes('Key') || key.includes('Digit') || /^[\/~]$/.test(event.key)){
+                // if key pressed is a valid cell value then change its contents
+                const character = event.key;
+
+                this.setCell(this.state.activeCell.x, this.state.activeCell.y, character);
+
+                // holding alt while entering character should not move pointer
+                if (!event.altKey){ this.advancePointer(); };
+                
             }
 
             this.draw();
