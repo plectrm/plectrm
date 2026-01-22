@@ -156,7 +156,8 @@ class staveGrid {
         /** @member {Object} el - Contains all HTML Elements associated with this object */
         this.el = {};
         
-        this.mouseState = { activeCell: { x: 0, y: 0 }, lastClicked:{ x: 0, y: 0 }, focus: false, inputDirection: Direction.Vertical, }
+        /** @member {Object} state - Contains attributes pertaining to the current state as changed by the user */
+        this.state = { activeCell: { x: 0, y: 0 }, lastClicked:{ x: 0, y: 0 }, focus: false, inputDirection: Direction.Vertical, }
 
         let gridContent = "";
         
@@ -168,7 +169,6 @@ class staveGrid {
         const arr = this.staveBox.cellArray.flat(1);
 
         this.el.baseContainer = this.staveBox.el.staveBoxGrid;
-        this.el.baseContainer.style.width = `${cols * this.parentWorkspace.emSize.width}px`;
         this.el.baseContainer.style.lineHeight = `${this.parentWorkspace.emSize.height * 1.05}px`;
 
         for (let y = 0; y < rows; y++){
@@ -196,13 +196,11 @@ class staveGrid {
         this.el.baseContainer.addEventListener('mousemove', (event) => {
             if (event.target !== this.el.baseContainer) { return; }
             const position = {
-                x: Math.min(Math.trunc(Math.max(event.offsetX, 0) / this.parentWorkspace.emSize.width), cols - 1),
+                x: Math.min(Math.trunc(Math.max(event.offsetX, 0) / (this.parentWorkspace.emSize.width * 1.015)), cols - 1),
                 y: Math.min(Math.trunc(Math.max(event.offsetY, 0) / (this.parentWorkspace.emSize.height * 1.05)), rows - 1)
             }
 
-            this.el.hoverHighlight.style.transform = `translate(${position.x * this.parentWorkspace.emSize.width}px, ${position.y * (this.parentWorkspace.emSize.height * 1.05)}px)`;
-            const idx = (position.x) + (position.y * cols)
-            this.el.hoverHighlight.textContent = arr.at(idx).value.trim();
+            this.el.hoverHighlight.style.transform = `translate(${position.x * (this.parentWorkspace.emSize.width * 1.015)}px, ${position.y * (this.parentWorkspace.emSize.height * 1.06)}px)`;
         });
 
         // handle click events
@@ -213,61 +211,61 @@ class staveGrid {
             if (event.button === 0){
                 event.preventDefault();
                 const position = {
-                    x: Math.min(Math.trunc(Math.max(event.offsetX, 0) / this.parentWorkspace.emSize.width), cols - 1),
+                    x: Math.min(Math.trunc(Math.max(event.offsetX, 0) / (this.parentWorkspace.emSize.width * 1.015)), cols - 1),
                     y: Math.min(Math.trunc(Math.max(event.offsetY, 0) / (this.parentWorkspace.emSize.height * 1.05)), rows - 1)
                 }
 
-                this.mouseState.activeCell = position;
-                this.mouseState.focus = true;
+                this.state.activeCell = position;
+                this.state.focus = true;
                 
                 // consecutive clicks on the same cell changes input direction
-                if ((this.mouseState.activeCell.x === this.mouseState.lastClicked.x) && (this.mouseState.activeCell.y === this.mouseState.lastClicked.y)){
-                    this.mouseState.inputDirection = this.mouseState.inputDirection == Direction.Vertical ? Direction.Horizontal : Direction.Vertical; 
+                if ((this.state.activeCell.x === this.state.lastClicked.x) && (this.state.activeCell.y === this.state.lastClicked.y)){
+                    this.state.inputDirection = this.state.inputDirection == Direction.Vertical ? Direction.Horizontal : Direction.Vertical; 
                 }
                 
                 this.draw();
-                Object.assign(this.mouseState, { lastClicked:{ x: position.x, y: position.y }} );
+                Object.assign(this.state, { lastClicked:{ x: position.x, y: position.y }} );
             }
         })
 
         document.body.addEventListener('mousedown', (event) => {
             if (this.el.baseContainer.contains(event.target)){ return; };
-            this.mouseState.focus = false;
+            this.state.focus = false;
             this.draw();
         })
 
         // handle keyboard events
         document.body.addEventListener('keydown', (event) => {
-            if (!this.mouseState.focus) { return; };
+            if (!this.state.focus) { return; };
             event.preventDefault();
 
             const key = event.code;
 
             if (key === 'Space'){
-                this.mouseState.inputDirection = this.mouseState.inputDirection == Direction.Vertical ? Direction.Horizontal : Direction.Vertical; 
+                this.state.inputDirection = this.state.inputDirection == Direction.Vertical ? Direction.Horizontal : Direction.Vertical; 
             } else if (key.includes('Key') || key.includes('Digit')){
                 // if key pressed is a valid cell value then change its contents
                 const character = event.key;
 
-                this.setCell(this.mouseState.activeCell.x, this.mouseState.activeCell.y, character);
+                this.setCell(this.state.activeCell.x, this.state.activeCell.y, character);
 
                 this.advancePointer();
             } else if (key.includes('Arrow')){
                 switch (key) {
                     case "ArrowUp":
-                        this.mouseState.inputDirection = Direction.Vertical;
+                        this.state.inputDirection = Direction.Vertical;
                         this.advancePointer();
                         break;
                     case "ArrowDown":
-                        this.mouseState.inputDirection = Direction.Vertical;
+                        this.state.inputDirection = Direction.Vertical;
                         this.retreatPointer();
                         break;
                     case "ArrowRight":
-                        this.mouseState.inputDirection = Direction.Horizontal;
+                        this.state.inputDirection = Direction.Horizontal;
                         this.advancePointer();
                         break;
                     case "ArrowLeft":
-                        this.mouseState.inputDirection = Direction.Horizontal;
+                        this.state.inputDirection = Direction.Horizontal;
                         this.retreatPointer();
                         break;
                     default:
@@ -283,43 +281,30 @@ class staveGrid {
      * Updates and draws changes to staveGrid's elements.
      */
     draw(){
-        if (this.mouseState.focus){
-            this.el.activeHighlight.focus();
+        if (this.state.focus){
+            this.el.baseContainer.classList.toggle('focus', true)
 
             // render direction highlight
-            if (this.mouseState.inputDirection == Direction.Horizontal){
-                const cells = this.staveBox.cellArray[this.mouseState.activeCell.y];
-                let content = "";
-                cells.forEach(cell => {
-                    content += cell.value.trim();
-                });
-                
-                this.el.directionHighlight.textContent = content;
-                this.el.directionHighlight.style.width = 'fit-content';
-                this.el.directionHighlight.style.height = 'fit-content';
+            if (this.state.inputDirection == Direction.Horizontal){
+                this.el.directionHighlight.style.width = `${this.staveBox.length + 1}em`;
+                this.el.directionHighlight.style.height = '1em';
                 this.el.directionHighlight.style.letterSpacing = '0.5em';
-                this.el.directionHighlight.style.transform = `translate(0px, ${(this.mouseState.activeCell.y * this.parentWorkspace.emSize.height) + (this.mouseState.activeCell.y)}px)`
+                this.el.directionHighlight.style.transform = `translate(1px, ${this.state.activeCell.y * (this.parentWorkspace.emSize.height * 1.06)}px)`;
 
-            } else if (this.mouseState.inputDirection == Direction.Vertical) {
-                let content = "";
-                this.staveBox.cellArray.forEach(row => {
-                    content += row[this.mouseState.activeCell.x].value.trim();
-                    content += `\n`;
-                });
-
-                this.el.directionHighlight.textContent = content;
+            } else if (this.state.inputDirection == Direction.Vertical) {
                 this.el.directionHighlight.style.width = '1em';
-                this.el.directionHighlight.style.height = `${this.staveBox.cellArray.length * this.parentWorkspace.emSize.height}px`;
+                this.el.directionHighlight.style.height = `${this.staveBox.cellArray.length * (this.parentWorkspace.emSize.height * 1.05)}px`;
                 this.el.directionHighlight.style.letterSpacing = 'normal';
-                this.el.directionHighlight.style.transform = `translate(${(this.mouseState.activeCell.x * (this.parentWorkspace.emSize.width * 1))}px, 2px)`
+                this.el.directionHighlight.style.transform = `translate(${this.state.activeCell.x * (this.parentWorkspace.emSize.width * 1.015)}px, 0px)`;
             }
 
             // render selected cell
-            const content = this.staveBox.cellArray[this.mouseState.activeCell.y][this.mouseState.activeCell.x].value;
+            const content = this.staveBox.cellArray[this.state.activeCell.y][this.state.activeCell.x].value;
             this.el.activeHighlight.textContent = content;
-            this.el.activeHighlight.style.transform = `translate(${this.mouseState.activeCell.x * this.parentWorkspace.emSize.width}px, ${this.mouseState.activeCell.y * (this.parentWorkspace.emSize.height * 1.05)}px)`;
-        } else {
 
+            this.el.activeHighlight.style.transform = `translate(${this.state.activeCell.x * (this.parentWorkspace.emSize.width * 1.015)}px, ${this.state.activeCell.y * (this.parentWorkspace.emSize.height * 1.06)}px)`;
+        } else {
+            this.el.baseContainer.classList.toggle('focus', false)
         }
     }
 
@@ -342,48 +327,54 @@ class staveGrid {
         this.el.baseContainer.firstChild.nodeValue = contents;
     }
 
+    /**
+     * Advances the position of the active cell pointer, dependent on inputDirection
+     */
     advancePointer() {
         let nextCell = { x: 0, y: 0 };
-        if ( this.mouseState.inputDirection == Direction.Vertical ){
-            if (this.mouseState.activeCell.y === 0){
-                nextCell.x = this.mouseState.activeCell.x == this.staveBox.length - 1 ? this.mouseState.activeCell.x : this.mouseState.activeCell.x + 1;
+        if ( this.state.inputDirection == Direction.Vertical ){
+            if (this.state.activeCell.y === 0){
+                nextCell.x = this.state.activeCell.x == this.staveBox.length - 1 ? this.state.activeCell.x : this.state.activeCell.x + 1;
                 nextCell.y = this.staveBox.tuning.length - 1;
             } else {
-                nextCell.x = this.mouseState.activeCell.x;
-                nextCell.y = this.mouseState.activeCell.y - 1;
+                nextCell.x = this.state.activeCell.x;
+                nextCell.y = this.state.activeCell.y - 1;
             }
-        } else if( this.mouseState.inputDirection == Direction.Horizontal ) {
-            if (this.mouseState.activeCell.x === this.staveBox.length - 1) {
+        } else if( this.state.inputDirection == Direction.Horizontal ) {
+            if (this.state.activeCell.x === this.staveBox.length - 1) {
                 nextCell.x = 0;
-                nextCell.y = this.mouseState.activeCell.y === this.staveBox.tuning.length - 1 ? this.mouseState.activeCell.y : this.mouseState.activeCell.y + 1;
+                nextCell.y = this.state.activeCell.y === this.staveBox.tuning.length - 1 ? this.state.activeCell.y : this.state.activeCell.y + 1;
             } else {
-                nextCell.x = this.mouseState.activeCell.x === this.staveBox.length - 1 ? 0 : this.mouseState.activeCell.x + 1;
-                nextCell.y = this.mouseState.activeCell.y;
+                nextCell.x = this.state.activeCell.x === this.staveBox.length - 1 ? 0 : this.state.activeCell.x + 1;
+                nextCell.y = this.state.activeCell.y;
             }
         }
-        this.mouseState.activeCell = nextCell;
+        this.state.activeCell = nextCell;
     }
 
+    /**
+     * Retreats the position of the active cell pointer, dependent on inputDirection
+     */
     retreatPointer(){
         let nextCell = { x: 0, y: 0 };
-        if ( this.mouseState.inputDirection == Direction.Vertical ){
-            if (this.mouseState.activeCell.y === this.staveBox.tuning.length - 1){
-                nextCell.x = this.mouseState.activeCell.x === 0 ? this.mouseState.activeCell.x : this.mouseState.activeCell.x - 1;
+        if ( this.state.inputDirection == Direction.Vertical ){
+            if (this.state.activeCell.y === this.staveBox.tuning.length - 1){
+                nextCell.x = this.state.activeCell.x === 0 ? this.state.activeCell.x : this.state.activeCell.x - 1;
                 nextCell.y = 0;
             } else {
-                nextCell.x = this.mouseState.activeCell.x;
-                nextCell.y = this.mouseState.activeCell.y + 1;
+                nextCell.x = this.state.activeCell.x;
+                nextCell.y = this.state.activeCell.y + 1;
             }
-        } else if( this.mouseState.inputDirection == Direction.Horizontal ) {
-            if (this.mouseState.activeCell.x === 0) {
+        } else if( this.state.inputDirection == Direction.Horizontal ) {
+            if (this.state.activeCell.x === 0) {
                 nextCell.x = this.staveBox.length - 1;
-                nextCell.y = this.mouseState.activeCell.y;
+                nextCell.y = this.state.activeCell.y;
             } else {
-                nextCell.x = this.mouseState.activeCell.x - 1;
-                nextCell.y = this.mouseState.activeCell.y;
+                nextCell.x = this.state.activeCell.x - 1;
+                nextCell.y = this.state.activeCell.y;
             }
         }
-        this.mouseState.activeCell = nextCell;
+        this.state.activeCell = nextCell;
     }
 }
 

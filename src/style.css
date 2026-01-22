@@ -289,6 +289,11 @@ body{
     box-shadow: 0 0 5px rgba(0,0,0,0.4);
 }
 
+.prototypeContainer:has(div:is(.focus)){
+    outline: 0;
+    box-shadow: 0 0 5px rgba(0,0,0,0.4);
+}
+
 .prototypeContainer.dragged{
     z-index: 50;
     background-color: rgba(var(--color-light-primary), 0.8);
@@ -449,26 +454,24 @@ body{
     grid-column: 2;
     grid-row: 1;
     height: 100%;
-    padding: 0.1rem 0 0 0.1rem;
-    gap: 0px 0px;
+    padding: 0.1rem 0 0.1rem 0.2rem;
     line-height: 1em;
     white-space: pre;
     user-select: none;
     font-size: 1em;
-    font-weight: bold;
     letter-spacing: 0.5em;
     overflow: clip;
 }
 
 .cellHighlight{
     position: absolute;
-    background-color: var(--color-light-secondary);
+    background-color: color-mix(in srgb, var(--color-light-tertiary) 30%, transparent );
     color: var(--color-light-primary);
-    outline: 3px solid var(--color-light-secondary);
-    outline-offset: -1px;
     width: 1em;
     height: 1em;
     opacity: 0%;
+    top: 0;
+    left: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -484,9 +487,9 @@ body{
 
 .cellDirection{
     position: absolute;
-    background-color: var(--color-light-secondary);
+    background-color: color-mix(in srgb, var(--color-light-tertiary) 30%, transparent );
     color: var(--color-dark-primary);
-    opacity: 100%;
+    opacity: 0%;
     pointer-events: none;
     text-align: center;
     display: flex;
@@ -498,7 +501,7 @@ body{
     left: 0;
 }
 
-.staveGrid:focus-within div.cellDirection{
+.staveGrid:is(.focus) div.cellDirection{
     opacity: 100%;
 }
 
@@ -510,7 +513,7 @@ body{
     outline-offset: -1px;
     width: 1em;
     height: 1em;
-    opacity: 100%;
+    opacity: 0%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -522,7 +525,7 @@ body{
     left: 0;
 }
 
-.staveGrid:focus-within div.cellActive{
+.staveGrid:is(.focus)  div.cellActive{
     opacity: 100%;
 }
 
@@ -587,7 +590,6 @@ body{
     cursor: col-resize;
     transition: all 70ms ease-in-out;
     background-color: transparent;
-    text-align: center;
     align-content: center;
     border-radius: 0rem 0.5rem 0.5rem 0rem;
 }
