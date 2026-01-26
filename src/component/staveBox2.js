@@ -83,20 +83,37 @@ export class StaveBox2 {
  * Initialises an array of cells to store staveBox values.
  * @param {number} x - Column count.
  * @param {number} y - Row count.
- * @param {[{value: string, idx: number}]} cloneArray - One dimentional array of cell values to copy from.
+ * @param {[[{value: string, idx: number}]]} cloneArray - Two dimentional array of cell values to copy from. Cells without a valid value will be defaulted.
  */
 
-function initCellArray(x, y, cloneArray = [{value: null, idx: null}]){
+function initCellArray(x, y, cloneArray = false){
     const cellArray = []
-    for (let row = 0; row < y; row++){
-        const rowArray = []
-        for (let col = 0; col < x; col++){
-            const idx = (x * row) + (col);
-            const value = cloneArray[idx] ? cloneArray[idx].value : '-';
-            rowArray.push({idx: idx, value: value})
+    if (!cloneArray || cloneArray.length < 1){
+        for (let row = 0; row < y; row++){
+            const rowArray = []
+            for (let col = 0; col < x; col++){
+                const idx = (x * row) + (col);
+                const value = '-';
+                rowArray.push({idx: idx, value: value})
+            }
+            cellArray.push(rowArray);
         }
-        cellArray.push(rowArray)
-    }
+    } else {
+        cloneArray.forEach((row, y) => {
+            const rowArray = []
+            row.forEach((cell, x )=> {
+                const idx = (y * cloneArray[0].length) + x;
+                let value;
+                if (typeof cell !== 'object'){
+                    value = '-';
+                } else {
+                    value = typeof cell.value ? cell.value : '-';
+                }
+                rowArray.push({idx: idx, value: value})
+            })
+            cellArray.push(rowArray);
+        })
+    } 
     return cellArray;
 }
 
@@ -118,21 +135,17 @@ class staveGrid {
         
         this.staveBox = stavebox;
         this.parentWorkspace = stavebox.parentWorkspace;
-        
-        const rows = this.staveBox.cellArray.length;
-        const cols = this.staveBox.cellArray[0].length;
-        const arr = this.staveBox.cellArray.flat(1);
 
         this.el.baseContainer = this.staveBox.el.staveBoxGrid;
         this.el.baseContainer.style.lineHeight = `${this.parentWorkspace.emSize.height * 1.05}px`;
 
-        for (let y = 0; y < rows; y++){
-            for (let x = 0; x < cols; x++){
-                const idx = (x * rows) + (y);
-                gridContent += arr.at(idx).value.trim();
-            }
+        this.staveBox.cellArray.forEach((row) => {
+            row.forEach(cell => {
+                gridContent += cell.value;
+            })
             gridContent += `\n`;
-        }
+        })
+
         this.el.baseContainer.textContent = gridContent;
 
         this.el.hoverHighlight = document.createElement('div');
@@ -151,8 +164,8 @@ class staveGrid {
         this.el.baseContainer.addEventListener('mousemove', (event) => {
             if (event.target !== this.el.baseContainer) { return; }
             const position = {
-                x: Math.min(Math.trunc(Math.max(event.offsetX, 0) / (this.parentWorkspace.emSize.width * 1.015)), cols - 1),
-                y: Math.min(Math.trunc(Math.max(event.offsetY, 0) / (this.parentWorkspace.emSize.height * 1.05)), rows - 1)
+                x: Math.min(Math.trunc(Math.max(event.offsetX, 0) / (this.parentWorkspace.emSize.width * 1.015)), this.staveBox.cellArray[0].length - 1),
+                y: Math.min(Math.trunc(Math.max(event.offsetY, 0) / (this.parentWorkspace.emSize.height * 1.05)), this.staveBox.cellArray.length - 1)
             }
 
             this.el.hoverHighlight.style.transform = `translate(${position.x * (this.parentWorkspace.emSize.width * 1.015)}px, ${position.y * (this.parentWorkspace.emSize.height * 1.06)}px)`;
@@ -166,8 +179,8 @@ class staveGrid {
             if (event.button === 0){
                 event.preventDefault();
                 const position = {
-                    x: Math.min(Math.trunc(Math.max(event.offsetX, 0) / (this.parentWorkspace.emSize.width * 1.015)), cols - 1),
-                    y: Math.min(Math.trunc(Math.max(event.offsetY, 0) / (this.parentWorkspace.emSize.height * 1.05)), rows - 1)
+                    x: Math.min(Math.trunc(Math.max(event.offsetX, 0) / (this.parentWorkspace.emSize.width * 1.015)), this.staveBox.cellArray[0].length - 1),
+                    y: Math.min(Math.trunc(Math.max(event.offsetY, 0) / (this.parentWorkspace.emSize.height * 1.05)), this.staveBox.cellArray.length - 1)
                 }
 
                 this.state.activeCell = position;
@@ -351,18 +364,13 @@ class staveGrid {
      */
     redrawGrid(){
         let gridContent = "";
-        
-        const rows = this.staveBox.cellArray.length;
-        const cols = this.staveBox.cellArray[0].length;
-        const arr = this.staveBox.cellArray.flat(1);
 
-        for (let y = 0; y < rows; y++){
-            for (let x = 0; x < cols; x++){
-                const idx = (x * rows) + (y);
-                gridContent += arr.at(idx).value;
-            }
+        this.staveBox.cellArray.forEach((row) => {
+            row.forEach(cell => {
+                gridContent += cell.value;
+            })
             gridContent += `\n`;
-        }
+        })
 
         this.el.baseContainer.firstChild.nodeValue = gridContent;
     }
@@ -457,15 +465,15 @@ class staveTuning {
             
             // handle whether new values added to start or end of tuning 
             if (newStr.startsWith(prevStr + '/')){
-                // add empty array to end of previous cellArray to create new row at the bottom
-                const newArray = new Array(this.staveBox.length);
-                newArray.push(prevCellArray.flat());
-                console.log(newArray.flat())
+                // add previous cellArray to start of new array to create new row at the top
+                const emptyRow = new Array(this.staveBox.length).fill(undefined);
+                const newArray = [emptyRow, ...prevCellArray];
                 this.staveBox.cellArray = initCellArray(this.staveBox.length, this.staveBox.tuning.length, newArray);
                 this.staveBox.staveGrid.redrawGrid();
             } else {
-                // add previous cellArray to start of new array to create new row at the top
-                const newArray = (new Array(this.staveBox.length)).push(prevCellArray.flat());
+                // add empty array to end of previous cellArray to create new row at the bottom
+                const emptyRow = new Array(this.staveBox.length).fill(undefined);
+                const newArray = [...prevCellArray, emptyRow];
                 this.staveBox.cellArray = initCellArray(this.staveBox.length, this.staveBox.tuning.length, newArray);
                 this.staveBox.staveGrid.redrawGrid();
             }
@@ -477,11 +485,11 @@ class staveTuning {
 
             // handle whether values removed from start or end of tuning 
             if (prevStr.startsWith(newStr + '/')){
-                const newArray = prevCellArray.slice(0, -1).flat();
+                const newArray = prevCellArray.slice(0, -1);
                 this.staveBox.cellArray = initCellArray(this.staveBox.length, this.staveBox.tuning.length, newArray);
                 this.staveBox.staveGrid.redrawGrid();
             } else {
-                const newArray = prevCellArray.slice(1).flat();
+                const newArray = prevCellArray.slice(1);
                 this.staveBox.cellArray = initCellArray(this.staveBox.length, this.staveBox.tuning.length, newArray);
                 this.staveBox.staveGrid.redrawGrid();
             }
