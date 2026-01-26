@@ -406,7 +406,6 @@ class staveTuning {
             textContainer.textContent = labelText;
             this.el.baseContainer.appendChild(textContainer);
         }
-        this.staveEnd.el.baseContainer.textContent = '|\r'.repeat(this.staveBox.tuning.length);
 
         this.el.baseContainer.addEventListener('mousedown', (event) => {
             if (event.button !== 0) { return; }
@@ -444,7 +443,7 @@ class staveTuning {
             textContainer.textContent = labelText;
             this.el.baseContainer.appendChild(textContainer);
         }
-        this.staveBox.el.staveEnd.textContent = '|\r'.repeat(this.staveBox.tuning.length);
+        this.staveBox.staveEnd.redraw(newTuning.length);
 
         const prevTuning = this.staveBox.tuning;
         
@@ -530,7 +529,11 @@ class staveEnd {
 
         });
 
-        this.staveBox.el.baseContainer.appendChild(this.el.baseContainer);
+        this.staveBox.el.staveBox.appendChild(this.el.baseContainer);
+    }
+
+    redraw(height = this.staveBox.tuning.length){
+        this.el.baseContainer.textContent = '|\r'.repeat(height);
     }
 }
 
