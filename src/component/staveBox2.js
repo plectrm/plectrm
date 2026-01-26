@@ -14,16 +14,11 @@ export class StaveBox2 {
         
         const options = staveBoxOptions;
         this.parentWorkspace = workspace;
-        this.tuning = tuning;
 
         /** @member {Object} el - Contains all HTML Elements associated with this object */
         this.el = {};
 
-        /** @member {Object[]} cellArray - A 2d array containing all the staveBox's grid's values and indexes.  */
-        this.cellArray = initCellArray(options.length, tuning.length, options.clonedCellArray);
-
-        /** @member {number} length - Length of the staveBox's grid  */
-        this.length = this.cellArray[0].length;
+        this.tuning = tuning;
 
         this.el.baseContainer = document.createElement('div');
         this.el.baseContainer.classList.add('prototypeContainer','stave');
@@ -36,45 +31,21 @@ export class StaveBox2 {
         this.el.staveBox.classList.add('staveBox');
         this.el.baseContainer.appendChild(this.el.staveBox);
 
-        this.el.stringLabels = document.createElement('div');
-        this.el.stringLabels.classList.add('staveTuningContainer');
-        this.el.stringLabels.title = "Change Tuning";
-        this.el.staveBox.appendChild(this.el.stringLabels);
-        
-        this.el.staveEnd = document.createElement('div');
-        this.el.staveEnd.classList.add('staveEnd');
-        this.el.staveEnd.textContent = '|\r'.repeat(this.tuning.length);
-        
-        this.setTuning(this.tuning);
+        this.staveTuning = new staveTuning(this, tuning);
 
-        this.el.staveEnd.addEventListener('mousedown', (event) => {
-            
-            const rect = this.el.staveContainer.getBoundingClientRect();
+        /** @member {Object[]} cellArray - A 2d array containing all the staveBox's grid's values and indexes.  */
+        this.cellArray = initCellArray(options.length, tuning.length, options.clonedCellArray);
 
-            const lengthHelper = new TransientInput(event.target, {x: rect.right, y: rect.bottom});
-            lengthHelper.createAndAddLabel('length');
-            lengthHelper.createAndAddLabel(() => `${this.length}`);
-            lengthHelper.endTransientInput();
-
-            document.addEventListener('mousemove', resizeHandler())
-            this.el.staveEnd.focus();
-            this.el.staveEnd.classList.add('focus');
-            
-            document.addEventListener('mouseup', () => {
-                document.body.style.cursor = 'auto';
-                this.el.staveEnd.classList.remove('focus');
-                document.removeEventListener('mousemove', resizeHandler())
-                lengthHelper.remove();
-            })
-
-        });
-        this.el.staveBox.appendChild(this.el.staveEnd);
+        /** @member {number} length - Length of the staveBox's grid  */
+        this.length = this.cellArray[0].length;
 
         this.el.staveBoxGrid = document.createElement('div');
         this.el.staveBoxGrid.classList.add('staveGrid');
         this.el.staveBox.appendChild(this.el.staveBoxGrid);
 
         this.staveGrid = new staveGrid(this, this.cellArray);
+
+        this.staveEnd = new staveEnd(this);
 
     }
 
@@ -91,24 +62,8 @@ export class StaveBox2 {
      * @param {string[]} _tuning - Tuning to change to as an array of strings.
      */
     setTuning(_tuning){
-        this.el.stringLabels.textContent = '';
-        let tuning = _tuning;
-        let hasAccidentals = /[#b]/.test(tuning);
-        for (let i = tuning.length - 1; i >= 0; i--){
-            const stringTuning = tuning.at(i);
-            let labelText;
-            // if current string label has accidental
-            if ((stringTuning.length > 1) || !hasAccidentals){
-                labelText = `${tuning.at(i)}|`;
-            } else {
-                labelText = `${tuning.at(i)} |`;
-            }
-            const textContainer = document.createElement('div');
-            textContainer.style.whiteSpace = 'nowrap';
-            textContainer.textContent = labelText;
-            this.el.stringLabels.appendChild(textContainer);
-        }
-        this.el.staveEnd.textContent = '|\r'.repeat(this.tuning.length);
+        this.tuning = _tuning;
+        this.staveTuning.updateTuning(_tuning);
     }
 
     decPositionInWorkspace(){
@@ -128,16 +83,16 @@ export class StaveBox2 {
  * Initialises an array of cells to store staveBox values.
  * @param {number} x - Column count.
  * @param {number} y - Row count.
- * @param {[]} [cloneArray] - Array of cell values to copy from.
+ * @param {[{value: string, idx: number}]} cloneArray - One dimentional array of cell values to copy from.
  */
 
-function initCellArray(x, y, cloneArray = []){
+function initCellArray(x, y, cloneArray = [{value: null, idx: null}]){
     const cellArray = []
     for (let row = 0; row < y; row++){
         const rowArray = []
         for (let col = 0; col < x; col++){
             const idx = (x * row) + (col);
-            const value = cloneArray[idx] ? cloneArray[i] : '-';
+            const value = cloneArray[idx] ? cloneArray[idx].value : '-';
             rowArray.push({idx: idx, value: value})
         }
         cellArray.push(rowArray)
@@ -389,6 +344,193 @@ class staveGrid {
             }
         }
         this.state.activeCell = nextCell;
+    }
+
+    /**
+     * Updates the whole text node of the staveGrid according to its cellArray
+     */
+    redrawGrid(){
+        let gridContent = "";
+        
+        const rows = this.staveBox.cellArray.length;
+        const cols = this.staveBox.cellArray[0].length;
+        const arr = this.staveBox.cellArray.flat(1);
+
+        for (let y = 0; y < rows; y++){
+            for (let x = 0; x < cols; x++){
+                const idx = (x * rows) + (y);
+                gridContent += arr.at(idx).value;
+            }
+            gridContent += `\n`;
+        }
+
+        this.el.baseContainer.firstChild.nodeValue = gridContent;
+    }
+}
+
+class staveTuning {
+    /**
+     * The element which displays and allows the user to change a staveBox's tuning
+     * @param {StaveBox2} stavebox - staveBox object to bind to.
+     * @param {[string]} initTuning - initial tuning to display.
+     */
+    constructor(stavebox, initTuning){
+
+        /** @member {Object} el - Contains all HTML Elements associated with this object */
+        this.el = {};
+
+        this.staveBox = stavebox;
+        this.parentWorkspace = stavebox.parentWorkspace;
+
+        this.el.baseContainer = document.createElement('div');
+        this.el.baseContainer.classList.add('staveTuningContainer');
+        this.el.baseContainer.title = "Change Tuning";
+        this.staveBox.el.staveBox.appendChild(this.el.baseContainer);
+
+
+        // set initial tuning and create labels
+        this.el.baseContainer.textContent = '';
+        let tuning = initTuning;
+        let hasAccidentals = /[#b]/.test(tuning);
+        for (let i = tuning.length - 1; i >= 0; i--){
+            const stringTuning = tuning.at(i);
+            let labelText;
+            // if current string label has accidental
+            if ((stringTuning.length > 1) || !hasAccidentals){
+                labelText = `${tuning.at(i)}|`;
+            } else {
+                labelText = `${tuning.at(i)} |`;
+            }
+            const textContainer = document.createElement('div');
+            textContainer.style.whiteSpace = 'nowrap';
+            textContainer.textContent = labelText;
+            this.el.baseContainer.appendChild(textContainer);
+        }
+        this.staveEnd.el.baseContainer.textContent = '|\r'.repeat(this.staveBox.tuning.length);
+
+        this.el.baseContainer.addEventListener('mousedown', (event) => {
+            if (event.button !== 0) { return; }
+            event.preventDefault();
+
+            const changeTuningMenu = new TransientInput(this.el.baseContainer, {x: event.pageX, y: event.pageY});
+            changeTuningMenu.createAndAddLabel('Tuning:');
+            changeTuningMenu.createAndAddTextInput(this.staveBox.tuning.join('/'), (contents) => {
+                if (!contents.includes('/')) { return false; };
+                contents = contents.trim();
+                let newTuning = contents.split('/');
+                newTuning = newTuning.filter(Boolean);
+                this.updateTuning(newTuning);
+                return true;
+            })
+            changeTuningMenu.endTransientInput();
+        });
+    }
+
+    updateTuning(_tuning){
+        this.el.baseContainer.textContent = '';
+        let newTuning = _tuning;
+        let hasAccidentals = /[#b]/.test(newTuning);
+        for (let i = newTuning.length - 1; i >= 0; i--){
+            const stringTuning = newTuning.at(i);
+            let labelText;
+            // if current string label has accidental
+            if ((stringTuning.length > 1) || !hasAccidentals){
+                labelText = `${newTuning.at(i)}|`;
+            } else {
+                labelText = `${newTuning.at(i)} |`;
+            }
+            const textContainer = document.createElement('div');
+            textContainer.style.whiteSpace = 'nowrap';
+            textContainer.textContent = labelText;
+            this.el.baseContainer.appendChild(textContainer);
+        }
+        this.staveBox.el.staveEnd.textContent = '|\r'.repeat(this.staveBox.tuning.length);
+
+        const prevTuning = this.staveBox.tuning;
+        
+        if(newTuning === prevTuning.length){
+            this.staveBox.tuning = newTuning;
+        } else if (newTuning.length > prevTuning.length){
+            this.staveBox.tuning = newTuning;
+            const prevStr = prevTuning.join('/');
+            const newStr = this.staveBox.tuning.join('/');
+            const prevCellArray = this.staveBox.cellArray;
+            
+            // handle whether new values added to start or end of tuning 
+            if (newStr.startsWith(prevStr + '/')){
+                // add empty array to end of previous cellArray to create new row at the bottom
+                const newArray = new Array(this.staveBox.length);
+                newArray.push(prevCellArray.flat());
+                console.log(newArray.flat())
+                this.staveBox.cellArray = initCellArray(this.staveBox.length, this.staveBox.tuning.length, newArray);
+                this.staveBox.staveGrid.redrawGrid();
+            } else {
+                // add previous cellArray to start of new array to create new row at the top
+                const newArray = (new Array(this.staveBox.length)).push(prevCellArray.flat());
+                this.staveBox.cellArray = initCellArray(this.staveBox.length, this.staveBox.tuning.length, newArray);
+                this.staveBox.staveGrid.redrawGrid();
+            }
+        } else if (newTuning.length < prevTuning.length){
+            this.staveBox.tuning = newTuning;
+            const prevStr = prevTuning.join('/');
+            const newStr = this.staveBox.tuning.join('/');
+            const prevCellArray = this.staveBox.cellArray;
+
+            // handle whether values removed from start or end of tuning 
+            if (prevStr.startsWith(newStr + '/')){
+                const newArray = prevCellArray.slice(0, -1).flat();
+                this.staveBox.cellArray = initCellArray(this.staveBox.length, this.staveBox.tuning.length, newArray);
+                this.staveBox.staveGrid.redrawGrid();
+            } else {
+                const newArray = prevCellArray.slice(1).flat();
+                this.staveBox.cellArray = initCellArray(this.staveBox.length, this.staveBox.tuning.length, newArray);
+                this.staveBox.staveGrid.redrawGrid();
+            }
+            
+        }
+    }
+}
+
+class staveEnd {
+    /**
+     * The element which shows the line on the right side of the stavebox and allows the user to change the staveBox's length
+     * @param {StaveBox2} stavebox - staveBox object to bind to.
+     */
+    constructor(stavebox){
+
+        /** @member {Object} el - Contains all HTML Elements associated with this object */
+        this.el = {};
+
+        this.staveBox = stavebox;
+        this.parentWorkspace = stavebox.parentWorkspace;
+
+        this.el.baseContainer = document.createElement('div');
+        this.el.baseContainer.classList.add('staveEnd');
+        this.el.baseContainer.textContent = '|\r'.repeat(this.staveBox.tuning.length);
+
+        this.el.baseContainer.addEventListener('mousedown', (event) => {
+            
+            const rect = this.el.staveContainer.getBoundingClientRect();
+
+            const lengthHelper = new TransientInput(event.target, {x: rect.right, y: rect.bottom});
+            lengthHelper.createAndAddLabel('length');
+            lengthHelper.createAndAddLabel(() => `${this.length}`);
+            lengthHelper.endTransientInput();
+
+            document.addEventListener('mousemove', resizeHandler())
+            this.el.baseContainer.focus();
+            this.el.baseContainer.classList.add('focus');
+            
+            document.addEventListener('mouseup', () => {
+                document.body.style.cursor = 'auto';
+                this.el.baseContainer.classList.remove('focus');
+                document.removeEventListener('mousemove', resizeHandler())
+                lengthHelper.remove();
+            })
+
+        });
+
+        this.staveBox.el.baseContainer.appendChild(this.el.baseContainer);
     }
 }
 

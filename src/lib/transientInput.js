@@ -6,21 +6,24 @@ export class TransientInput {
             }
         }
         this.target = target;
+        this.target.classList.toggle('focus', true);
         this.transientInputContainer = document.createElement('div');
         this.transientInputContainer.classList.add('transientInputContainer');
         document.body.appendChild(this.transientInputContainer);
+
+        this.x = pos.x;
+        this.y = pos.y;
 
         this.transientInputContainer.style.transform = `translate(${this.x}px, ${this.y}px)`;
 
         this.callbackList = [];
 
-        this.x = pos.x;
-        this.y = pos.y;
 
 
         this.clickHandler = (_event) => {
             if (!this.transientInputContainer.contains(_event.target)){
                 _event.preventDefault();
+                if (!this.target.contains(_event.target)) { this.target.classList.toggle('focus', false); };
                 this.transientInputContainer.remove();
                 document.removeEventListener('mousedown', this.clickHandler)
             }
@@ -119,7 +122,7 @@ export class TransientInput {
             successful.push(true);
           }
         })
-        if (!successful.includes(false)) { this.transientInputContainer.remove(); }
+        if (!successful.includes(false)) { this.remove(); }
     }
 
     endTransientInput(){
@@ -165,6 +168,7 @@ export class TransientInput {
     }
 
     remove(){
+        this.target.classList.toggle('focus', false);
         this.transientInputContainer.remove();
         document.removeEventListener('mousedown', this.clickHandler)
     }
