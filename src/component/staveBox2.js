@@ -53,6 +53,26 @@ export class StaveBox2 {
             { label: 'remove', func: this.remove }
         ];
 
+        // Right-click context menu handler on the entire component
+        this.el.baseContainer.addEventListener('mousedown', (event) => {
+            if (event.button !== 2) { return; }
+            event.preventDefault();
+
+            const popUpContextMenu = new TransientInput(this.el.baseContainer, { x: event.pageX, y: event.pageY });
+            popUpContextMenu.createAndAddLabel(this.constructor.name);
+            popUpContextMenu.createAndAddDivisor();
+            
+            for (let i = 0; i < this.contextMenuOptions.length; i++) {
+                popUpContextMenu.createAndAddButton(this.contextMenuOptions[i].label, () => {
+                    const f = this.contextMenuOptions[i].func.bind(this);
+                    f();
+                    return true;
+                });
+            }
+            
+            popUpContextMenu.endTransientInput();
+        });
+
     }
 
     /**
