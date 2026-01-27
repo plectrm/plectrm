@@ -544,18 +544,19 @@ class staveTuning {
             const prevStr = prevTuning.join('/');
             const newStr = this.staveBox.tuning.join('/');
             const prevCellArray = this.staveBox.cellArray;
+            const diff = newTuning.length - prevTuning.length;
             
             // handle whether new values added to start or end of tuning 
             if (newStr.startsWith(prevStr + '/')){
-                // add previous cellArray to start of new array to create new row at the top
-                const emptyRow = new Array(this.staveBox.length).fill(undefined);
-                const newArray = [emptyRow, ...prevCellArray];
+                // add new rows at the top (new tuning extends prev tuning)
+                const emptyRows = Array.from({ length: diff }, () => new Array(this.staveBox.length).fill(undefined));
+                const newArray = [...emptyRows, ...prevCellArray];
                 this.staveBox.cellArray = initCellArray(this.staveBox.length, this.staveBox.tuning.length, newArray);
                 this.staveBox.staveGrid.redrawGrid();
             } else {
-                // add empty array to end of previous cellArray to create new row at the bottom
-                const emptyRow = new Array(this.staveBox.length).fill(undefined);
-                const newArray = [...prevCellArray, emptyRow];
+                // add new rows at the bottom (new tuning is different at start)
+                const emptyRows = Array.from({ length: diff }, () => new Array(this.staveBox.length).fill(undefined));
+                const newArray = [...prevCellArray, ...emptyRows];
                 this.staveBox.cellArray = initCellArray(this.staveBox.length, this.staveBox.tuning.length, newArray);
                 this.staveBox.staveGrid.redrawGrid();
             }
@@ -564,14 +565,17 @@ class staveTuning {
             const prevStr = prevTuning.join('/');
             const newStr = this.staveBox.tuning.join('/');
             const prevCellArray = this.staveBox.cellArray;
+            const diff = prevTuning.length - newTuning.length;
 
             // handle whether values removed from start or end of tuning 
             if (prevStr.startsWith(newStr + '/')){
-                const newArray = prevCellArray.slice(0, -1);
+                // removed from end - keep rows from start
+                const newArray = prevCellArray.slice(0, prevCellArray.length - diff);
                 this.staveBox.cellArray = initCellArray(this.staveBox.length, this.staveBox.tuning.length, newArray);
                 this.staveBox.staveGrid.redrawGrid();
             } else {
-                const newArray = prevCellArray.slice(1);
+                // removed from start - keep rows from end
+                const newArray = prevCellArray.slice(diff);
                 this.staveBox.cellArray = initCellArray(this.staveBox.length, this.staveBox.tuning.length, newArray);
                 this.staveBox.staveGrid.redrawGrid();
             }
