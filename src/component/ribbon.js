@@ -24,7 +24,8 @@ export function AddStaveBoxButton(_ribbon, workspace){
     staveBoxButton.title = "Add StaveBox";
     staveBoxButton.Options = {size: 24, tuning: 'E/A/D/G/B/e/'}
     staveBoxButton.onclick = function(){
-        workspace.ChildObjects.push(new StaveBox(workspace, staveBoxButton.Options.size, staveBoxButton.Options.tuning))
+        const tuningArray = staveBoxButton.Options.tuning.split('/').filter(Boolean);
+        workspace.ChildObjects.push(new StaveBox(workspace, tuningArray, { length: staveBoxButton.Options.size, clonedCellArray: [] }))
     };
 
     const staveBoxDropdown = document.createElement('button');

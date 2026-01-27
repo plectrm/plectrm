@@ -289,6 +289,11 @@ body{
     box-shadow: 0 0 5px rgba(0,0,0,0.4);
 }
 
+.prototypeContainer:has(div:is(.focus)){
+    outline: 0;
+    box-shadow: 0 0 5px rgba(0,0,0,0.4);
+}
+
 .prototypeContainer.dragged{
     z-index: 50;
     background-color: rgba(var(--color-light-primary), 0.8);
@@ -342,6 +347,10 @@ body{
     opacity: 100%;
 }
 
+.prototypeContainer:has(div:is(.focus)) .contextMenu{
+    opacity: 100%;
+}
+
 .contextMenu{
     min-height: 1em;
     height: 100%;
@@ -353,6 +362,8 @@ body{
     justify-content: space-between;
     flex-direction: column;
     clip-path: fill-box;
+    grid-row: 1;
+    grid-column: 1;
 }
 
 .dragHandle{
@@ -365,7 +376,7 @@ body{
     align-content: center;
     background-color: transparent;
     user-select: none;
-    cursor: pointer;
+    cursor: grab;
     border: 0;
     transition: all 120ms ease-in-out;
 }
@@ -442,16 +453,88 @@ body{
     grid-template-columns: auto auto 0.8rem;
     grid-template-rows: 100%;
     align-content: center;
+    grid-row: 1;
+    grid-column: 2;
 }
 
 .staveGrid{
-    display: grid;
+    position: relative;
     grid-column: 2;
     grid-row: 1;
     height: 100%;
-    width: fit-content;
-    padding: 0.1rem 0;
-    gap: 0px 0px;
+    padding: 0.1rem 0 0.1rem 0.2rem;
+    line-height: 1em;
+    white-space: pre;
+    user-select: none;
+    font-size: 1em;
+    letter-spacing: 0.5em;
+    overflow: clip;
+}
+
+.cellHighlight{
+    position: absolute;
+    background-color: color-mix(in srgb, var(--color-light-tertiary) 30%, transparent );
+    color: var(--color-light-primary);
+    width: 1em;
+    height: 1em;
+    opacity: 0%;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1em;
+    letter-spacing: normal;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.staveGrid:hover div.cellHighlight{
+    opacity: 100%;
+}
+
+.cellDirection{
+    position: absolute;
+    background-color: color-mix(in srgb, var(--color-light-tertiary) 30%, transparent );
+    color: var(--color-dark-primary);
+    opacity: 0%;
+    pointer-events: none;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: normal;
+    z-index: 2;
+    top: 0;
+    left: 0;
+}
+
+.staveGrid:is(.focus) div.cellDirection{
+    opacity: 100%;
+}
+
+.cellActive{
+    position: absolute;
+    background-color: var(--color-blue);
+    color: var(--color-light-primary);
+    outline: 3px solid var(--color-blue);
+    outline-offset: -1px;
+    width: 1em;
+    height: 1em;
+    opacity: 0%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1em;
+    letter-spacing: normal;
+    pointer-events: none;
+    z-index: 3;
+    top: 0;
+    left: 0;
+}
+
+.staveGrid:is(.focus)  div.cellActive{
+    opacity: 100%;
 }
 
 .staveGridCell{
@@ -502,7 +585,7 @@ body{
     align-content: center;
 }
 
-.staveTuningContainer:active{
+.staveTuningContainer:is(.focus){
     background-color: var(--color-light-secondary);
 }
 
@@ -515,9 +598,7 @@ body{
     cursor: col-resize;
     transition: all 70ms ease-in-out;
     background-color: transparent;
-    text-align: center;
     align-content: center;
-    padding: 0.2rem 0 0 0;
     border-radius: 0rem 0.5rem 0.5rem 0rem;
 }
 

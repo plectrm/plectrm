@@ -1,91 +1,140 @@
-import { ContextMenu } from "@/component/contextMenu.js";
+import { DragHandle } from "@/component/dragHandle.js";
+import { TransientInput } from "@/lib/transientInput.js";
 
+/**
+ * A text box component for freeform text input within the workspace.
+ */
 export class TextBox {
+    /**
+     * Creates a TextBox.
+     * @param {Workspace} workspace - The parent workspace for the textBox.
+     * @param {string} [textContent=''] - Initial text content (can include HTML).
+     */
     constructor(workspace, textContent = '') {
-
         this.parentWorkspace = workspace;
-        this.contextMenuOptions = [{label: 'duplicate', func: this.duplicate}, {label: 'remove', func: this.remove}];
 
-        this.textContainer = document.createElement('div');
-        this.textContainer.classList.add('prototypeContainer','text');
-        this.parentWorkspace.el.appendChild(this.textContainer);
+        /** @member {Object} el - Contains all HTML Elements associated with this object */
+        this.el = {};
 
-        const contextMenu = new ContextMenu(this, this.parentWorkspace);
-        this.textContainer.appendChild(contextMenu);
+        /** @member {Array} contextMenuOptions - Options for the right-click context menu */
+        this.contextMenuOptions = [
+            { label: 'duplicate', func: this.duplicate },
+            { label: 'remove', func: this.remove }
+        ];
 
-        this.textBox = document.createElement('div');
-        this.textBox.classList.add('textBox');
-        this.textBox.contentEditable = 'true';
-        this.textBox.spellcheck = false;
+        this.el.baseContainer = document.createElement('div');
+        this.el.baseContainer.classList.add('prototypeContainer', 'text');
+        this.parentWorkspace.el.appendChild(this.el.baseContainer);
 
-        if (textContent.includes('<div>')){
-            this.textBox.innerHTML = textContent;
+        this.el.dragHandle = new DragHandle(this, this.parentWorkspace);
+        this.el.baseContainer.appendChild(this.el.dragHandle);
+
+        this.el.textBox = document.createElement('div');
+        this.el.textBox.classList.add('textBox');
+        this.el.textBox.contentEditable = 'true';
+        this.el.textBox.spellcheck = false;
+
+        if (textContent.includes('<div>')) {
+            this.el.textBox.innerHTML = textContent;
         } else {
-            this.textBox.textContent = textContent;
+            this.el.textBox.textContent = textContent;
         }
 
-        this.textContainer.appendChild(this.textBox);
-        
+        this.el.baseContainer.appendChild(this.el.textBox);
+
+        // Right-click context menu handler on the entire component
+        this.el.baseContainer.addEventListener('mousedown', (event) => {
+            if (event.button !== 2) { return; }
+            event.preventDefault();
+
+            const popUpContextMenu = new TransientInput(this.el.baseContainer, { x: event.pageX, y: event.pageY });
+            popUpContextMenu.createAndAddLabel(this.constructor.name);
+            popUpContextMenu.createAndAddDivisor();
+
+            for (let i = 0; i < this.contextMenuOptions.length; i++) {
+                popUpContextMenu.createAndAddButton(this.contextMenuOptions[i].label, () => {
+                    const f = this.contextMenuOptions[i].func.bind(this);
+                    f();
+                    return true;
+                });
+            }
+
+            popUpContextMenu.endTransientInput();
+        });
     }
 
-    parseStringContents(){
-        let xmlMarkupString = this.textBox.innerHTML;
+    /**
+     * Parses the textBox contents into a plain text string.
+     * Converts <div> elements to newlines.
+     * @returns {string} The parsed text content.
+     */
+    parseStringContents() {
+        let xmlMarkupString = this.el.textBox.innerHTML;
         let outputMarkup = "";
-        
-        
-        function parseTags(prevOpen, prevClose){
+
+        function parseTags(prevOpen, prevClose) {
             let openTag = xmlMarkupString.indexOf('<div>', prevOpen + 1);
             let closeTag = xmlMarkupString.indexOf('</div>', prevClose + 1);
-            if (openTag > 0 && closeTag > 0){
+            if (openTag > 0 && closeTag > 0) {
                 outputMarkup += `${xmlMarkupString.slice(openTag + 5, closeTag)}\n`
                 parseTags(openTag, closeTag)
             }
             return;
         }
-        
+
         let linebreak = xmlMarkupString.indexOf('<div>');
-        if (linebreak > 0){
+        if (linebreak > 0) {
             outputMarkup += `${xmlMarkupString.slice(0, linebreak)}\n`
             parseTags(-1, -1)
         } else {
             outputMarkup = `${xmlMarkupString.trimEnd()}\n`;
         }
 
-        const textBuffer = outputMarkup;
-        return textBuffer;
+        return outputMarkup;
     }
 
-    remove(){
+    /**
+     * Removes this textBox from the workspace and cleans up DOM elements.
+     */
+    remove() {
         const index = this.parentWorkspace.ChildObjects.indexOf(this);
         this.parentWorkspace.ChildObjects.splice(index, 1);
-        this.textContainer.remove();
+        this.el.baseContainer.remove();
     }
 
-    duplicate(){
+    /**
+     * Duplicates this textBox, inserting the copy immediately after this one.
+     */
+    duplicate() {
         const index = this.parentWorkspace.ChildObjects.indexOf(this);
-        const cloneTextbox = new TextBox(this.parentWorkspace, this.textBox.innerHTML);
-        this.textContainer.insertAdjacentElement('afterend', cloneTextbox.textContainer);
+        const cloneTextbox = new TextBox(this.parentWorkspace, this.el.textBox.innerHTML);
+        this.el.baseContainer.insertAdjacentElement('afterend', cloneTextbox.el.baseContainer);
         this.parentWorkspace.ChildObjects.splice(index + 1, 0, cloneTextbox);
     }
 
-    getRootContainer(){
-        return this.textContainer;
+    /**
+     * Returns the root element of this component.
+     * @returns {HTMLDivElement}
+     */
+    getRootContainer() {
+        return this.el.baseContainer;
     }
 
-    getObjectNameAsString(){
-        return 'TextBox'
-    }
-
-    decPositionInWorkspace(){
+    /**
+     * Decreases this textBox's position in the workspace (moves up).
+     */
+    decPositionInWorkspace() {
         const index = this.parentWorkspace.ChildObjects.indexOf(this);
         this.parentWorkspace.ChildObjects.splice(index, 1);
         this.parentWorkspace.ChildObjects.splice(index - 1, 0, this);
     }
 
-    incPositionInWorkspace(){
+    /**
+     * Increases this textBox's position in the workspace (moves down).
+     */
+    incPositionInWorkspace() {
         const index = this.parentWorkspace.ChildObjects.indexOf(this);
         this.parentWorkspace.ChildObjects.splice(index, 1);
         this.parentWorkspace.ChildObjects.splice(index + 1, 0, this);
     }
 }
-

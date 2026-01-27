@@ -1,6 +1,5 @@
 import { StaveBox } from "@/component/staveBox";
 import { TextBox } from "@/component/textBox";
-import { NotationLegend } from "@/component/notationLegend";
 import { requestImportFile } from "@/lib/importFile";
 
 export function initStartscreen(foreground, workspace) {
@@ -34,7 +33,7 @@ export function initStartscreen(foreground, workspace) {
 
         newProjectButton.addEventListener('click', () => {
             workspace.ChildObjects.push(new TextBox(workspace));
-            workspace.ChildObjects.push(new StaveBox(workspace, 24, 'E/A/D/G/B/e/'));
+            workspace.ChildObjects.push(new StaveBox(workspace, ['E', 'A', 'D', 'G', 'B', 'e']));
             foreground.active(false);
             startscreenContainer.classList.toggle('hidden', true);
             setTimeout(() => { startscreenContainer.remove() }, 500)
@@ -54,12 +53,12 @@ export function initStartscreen(foreground, workspace) {
                     if (obj.el === "textbox"){
                         workspace.ChildObjects.push(new TextBox(workspace, obj.contents.contents));
                     } else if (obj.el === "stavebox"){
-                        const sb = new StaveBox(workspace, obj.contents.gridLength, obj.contents.tuning, obj.contents.cellArray)
+                        const sb = new StaveBox(workspace, obj.contents.tuning, { 
+                            length: obj.contents.length, 
+                            clonedCellArray: obj.contents.clonedCellArray 
+                        });
                         workspace.ChildObjects.push(sb);
-                        if (obj.contents.articulation){
-                            let event = new CustomEvent('click', { detail: obj.contents.articulation });
-                            sb.hoverMenu.dispatchEvent(event);
-                        }
+                        // Note: articulation feature not yet implemented in new StaveBox
                     }
     
                     foreground.active(false);

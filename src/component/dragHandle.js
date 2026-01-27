@@ -1,6 +1,6 @@
 import { TransientInput } from "@/lib/transientInput.js";
 
-export class ContextMenu {
+export class DragHandle {
     constructor(parentObject, workspace) {
         const parentContainer = parentObject.getRootContainer();
         const contextMenu = document.createElement('div');
@@ -115,65 +115,42 @@ export class ContextMenu {
         }
 
         dragButton.addEventListener('mousedown', (event) => {
-            if (event.button == 2){
-                //get parent object's context menu options
-                const parentFuncs = parentObject.contextMenuOptions;
+            if (event.button !== 0) { return; }
+            //drag element
+            document.body.style.cursor = 'grabbing';
+            const elementRect = dragButton.getBoundingClientRect();
+            elementCenterY = elementRect.top + (elementRect.height / 2);
+            parentContainer.classList.add('dragged');
+            parentContainer.style.transform = `scale(102%)`;
+            // if(parentContainer.classList.contains('stave')) { parentObject.closeHoverMenu() };
 
-                //open expanded context menu on right click
-                const popUpContextMenu = new TransientInput(dragButton, {x: event.pageX,y: event.pageY});
-                popUpContextMenu.createAndAddLabel(parentObject.getObjectNameAsString());
-                popUpContextMenu.createAndAddDivisor();
-                //add parent's menu options
-                for (let i = 0; i < parentFuncs.length; i++){
-                    popUpContextMenu.createAndAddButton(parentFuncs[i].label, ()=>{
-                        const f = parentFuncs[i].func.bind(parentObject);
-                        f();
-                        return true;
-                    })
-                }
-                
-                popUpContextMenu.endTransientInput();
+            previousElement = parentContainer.previousElementSibling;
+            nextElement = parentContainer.nextElementSibling;
 
+            if (previousElement){previousElement.classList.toggle('glowBelow', true)};
+            if (nextElement){nextElement.classList.toggle('glowAbove', true)};
 
-            } else {
-                //drag element
-                document.body.style.cursor = 'grabbing';
-                const elementRect = dragButton.getBoundingClientRect();
-                elementCenterY = elementRect.top + (elementRect.height / 2);
-                parentContainer.classList.add('dragged');
-                parentContainer.style.transform = `scale(102%)`;
-                if(parentContainer.classList.contains('stave')) { parentObject.closeHoverMenu() };
+            if (previousElement){previousElementRect = previousElement.getBoundingClientRect()};
+            if (nextElement){nextElementRect = nextElement.getBoundingClientRect()};
+
+            document.addEventListener('mousemove', elementDragging);
+
+            document.addEventListener('mouseup', (event) => {
+                dragButton.classList.toggle('forceActive', false)
+                document.body.style.cursor = 'auto';
+                parentContainer.style.transform = `translateY(0px) scale(100%)`;
+                yOffset = 0;
+                parentContainer.classList.remove('dragged');
+                // if (parentContainer.contains(event.target) && parentContainer.classList.contains('stave')) { parentObject.openHoverMenu(); }
 
                 previousElement = parentContainer.previousElementSibling;
                 nextElement = parentContainer.nextElementSibling;
 
-                if (previousElement){previousElement.classList.toggle('glowBelow', true)};
-                if (nextElement){nextElement.classList.toggle('glowAbove', true)};
+                if (previousElement){previousElement.classList.toggle('glowBelow', false)};
+                if (nextElement){nextElement.classList.toggle('glowAbove', false)};
 
-                if (previousElement){previousElementRect = previousElement.getBoundingClientRect()};
-                if (nextElement){nextElementRect = nextElement.getBoundingClientRect()};
-
-
-                document.addEventListener('mousemove', elementDragging);
-
-                document.addEventListener('mouseup', (event) => {
-                    dragButton.classList.toggle('forceActive', false)
-                    document.body.style.cursor = 'auto';
-                    parentContainer.style.transform = `translateY(0px) scale(100%)`;
-                    yOffset = 0;
-                    parentContainer.classList.remove('dragged');
-                    if (parentContainer.contains(event.target) && parentContainer.classList.contains('stave')) { parentObject.openHoverMenu(); }
-
-                    previousElement = parentContainer.previousElementSibling;
-                    nextElement = parentContainer.nextElementSibling;
-
-                    if (previousElement){previousElement.classList.toggle('glowBelow', false)};
-                    if (nextElement){nextElement.classList.toggle('glowAbove', false)};
-
-                    document.removeEventListener('mousemove', elementDragging);
-                })
-
-            }
+                document.removeEventListener('mousemove', elementDragging);
+            });
         })
 
         deleteButton.addEventListener('mousedown', (event) => {
