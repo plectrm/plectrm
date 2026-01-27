@@ -133,11 +133,21 @@ function StaveOptions(){
             this.cellArray.push(dif);
         };
         
-        const dummyArray = this.cellArray.flat().map(element => ({
-            textContent: element
-        }));
+        // Convert 2D cellArray to format expected by new StaveBox constructor
+        // Each cell needs: {idx, value}
+        const clonedCellArray = this.cellArray.map((row, rowIdx) => 
+            row.map((cell, colIdx) => ({
+                idx: rowIdx * this.gridLength + colIdx,
+                value: cell
+            }))
+        );
 
-        const r = {tuning: this.tuning.join("/"), gridLength: this.gridLength, cellArray: dummyArray, articulation: this.staveArticulation};
+        const r = {
+            tuning: this.tuning, 
+            length: this.gridLength, 
+            clonedCellArray: clonedCellArray, 
+            articulation: this.staveArticulation
+        };
         return r;
     }
 
