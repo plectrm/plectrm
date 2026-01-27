@@ -516,28 +516,90 @@ class staveEnd {
         this.el.baseContainer.textContent = '|\r'.repeat(this.staveBox.tuning.length);
 
         this.el.baseContainer.addEventListener('mousedown', (event) => {
+            if (event.button !== 0) { return; }
+            event.preventDefault();
             
-            const rect = this.el.staveContainer.getBoundingClientRect();
+            const rect = this.staveBox.el.baseContainer.getBoundingClientRect();
+            
+            this.lengthHelper = new TransientInput(event.target, {x: rect.right, y: rect.bottom});
+            this.lengthHelper.createAndAddLabel('length');
+            this.lengthHelper.createAndAddLabel(() => `${this.staveBox.length}`);
+            this.lengthHelper.endTransientInput();
 
-            const lengthHelper = new TransientInput(event.target, {x: rect.right, y: rect.bottom});
-            lengthHelper.createAndAddLabel('length');
-            lengthHelper.createAndAddLabel(() => `${this.length}`);
-            lengthHelper.endTransientInput();
-
-            document.addEventListener('mousemove', resizeHandler())
-            this.el.baseContainer.focus();
             this.el.baseContainer.classList.add('focus');
+            document.body.style.cursor = 'col-resize';
+
+            const resizeHandler = (event) => this.handleResize(event);
             
-            document.addEventListener('mouseup', () => {
+            document.addEventListener('mousemove', resizeHandler);
+            
+            const mouseUpHandler = () => {
                 document.body.style.cursor = 'auto';
                 this.el.baseContainer.classList.remove('focus');
-                document.removeEventListener('mousemove', resizeHandler())
-                lengthHelper.remove();
-            })
-
+                document.removeEventListener('mousemove', resizeHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+                this.lengthHelper.remove();
+            };
+            
+            document.addEventListener('mouseup', mouseUpHandler);
         });
 
         this.staveBox.el.staveBox.appendChild(this.el.baseContainer);
+    }
+
+    /**
+     * Handles the resize drag operation - updates grid width based on mouse position
+     * @param {MouseEvent} event 
+     */
+    handleResize(event){
+        const workspaceRight = this.parentWorkspace.el.getBoundingClientRect().right;
+        const mouseX = Math.min(event.clientX, workspaceRight - (this.parentWorkspace.emSize.width * 2));
+        
+        const gridRect = this.staveBox.el.staveBoxGrid.getBoundingClientRect();
+        const cellWidth = gridRect.width / this.staveBox.length;
+        const newLength = Math.max(Math.round((mouseX - gridRect.left) / cellWidth), 1);
+
+        if (newLength === this.staveBox.length) { return; }
+
+        this.resizeGrid(newLength);
+
+        const rect = this.staveBox.el.baseContainer.getBoundingClientRect();
+        this.lengthHelper.draw({x: rect.right, y: rect.bottom});
+    }
+
+    /**
+     * Resizes the grid to a new length, preserving existing cell data
+     * @param {number} newLength - The new grid length (number of columns)
+     */
+    resizeGrid(newLength){
+        const prevLength = this.staveBox.length;
+        const rowCount = this.staveBox.tuning.length;
+        
+        if (newLength < prevLength) {
+            // truncate each row
+            for (let row = 0; row < rowCount; row++){
+                this.staveBox.cellArray[row] = this.staveBox.cellArray[row].slice(0, newLength);
+            }
+        } else if (newLength > prevLength) {
+            // add new cells to each row
+            const diff = newLength - prevLength;
+            for (let row = 0; row < rowCount; row++){
+                const newCells = Array.from({ length: diff }, (_, i) => ({
+                    idx: (row * newLength) + prevLength + i,
+                    value: '-'
+                }));
+                this.staveBox.cellArray[row].push(...newCells);
+            }
+            // reindex all cells
+            for (let row = 0; row < rowCount; row++){
+                for (let col = 0; col < newLength; col++){
+                    this.staveBox.cellArray[row][col].idx = (row * newLength) + col;
+                }
+            }
+        }
+
+        this.staveBox.length = newLength;
+        this.staveBox.staveGrid.redrawGrid();
     }
 
     redraw(height = this.staveBox.tuning.length){
