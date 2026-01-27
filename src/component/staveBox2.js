@@ -47,6 +47,12 @@ export class StaveBox2 {
 
         this.staveEnd = new staveEnd(this);
 
+        /** @member {Array} contextMenuOptions - Options for the right-click context menu */
+        this.contextMenuOptions = [
+            { label: 'duplicate', func: this.duplicate },
+            { label: 'remove', func: this.remove }
+        ];
+
     }
 
     /**
@@ -76,6 +82,36 @@ export class StaveBox2 {
         const index = this.parentWorkspace.ChildObjects.indexOf(this);
         this.parentWorkspace.ChildObjects.splice(index, 1);
         this.parentWorkspace.ChildObjects.splice(index + 1, 0, this);
+    }
+
+    /**
+     * Removes this staveBox from the workspace and cleans up DOM elements.
+     */
+    remove(){
+        const index = this.parentWorkspace.ChildObjects.indexOf(this);
+        this.parentWorkspace.ChildObjects.splice(index, 1);
+        this.el.baseContainer.remove();
+    }
+
+    /**
+     * Duplicates this staveBox, inserting the copy immediately after this one.
+     */
+    duplicate(){
+        const index = this.parentWorkspace.ChildObjects.indexOf(this);
+
+        // Extract just the values from the 2D cellArray for cloning
+        const clonedCellArray = this.cellArray.map(row => 
+            row.map(cell => ({ value: cell.value }))
+        );
+
+        const cloneStavebox = new StaveBox2(
+            this.parentWorkspace, 
+            this.tuning, 
+            { length: this.length, clonedCellArray: clonedCellArray }
+        );
+
+        this.el.baseContainer.insertAdjacentElement('afterend', cloneStavebox.el.baseContainer);
+        this.parentWorkspace.ChildObjects.splice(index + 1, 0, cloneStavebox);
     }
 }
 
@@ -107,7 +143,7 @@ function initCellArray(x, y, cloneArray = false){
                 if (typeof cell !== 'object'){
                     value = '-';
                 } else {
-                    value = typeof cell.value ? cell.value : '-';
+                    value = cell.value !== undefined ? cell.value : '-';
                 }
                 rowArray.push({idx: idx, value: value})
             })

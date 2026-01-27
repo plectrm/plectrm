@@ -121,8 +121,9 @@ export class DragHandle {
 
                 //open expanded context menu on right click
                 const popUpContextMenu = new TransientInput(dragButton, {x: event.pageX,y: event.pageY});
-                popUpContextMenu.createAndAddLabel(parentObject.getObjectNameAsString());
+                popUpContextMenu.createAndAddLabel(String(parentObject.constructor.name));
                 popUpContextMenu.createAndAddDivisor();
+
                 //add parent's menu options
                 for (let i = 0; i < parentFuncs.length; i++){
                     popUpContextMenu.createAndAddButton(parentFuncs[i].label, ()=>{
