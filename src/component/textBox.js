@@ -1,5 +1,5 @@
 import { DragHandle } from "@/component/dragHandle.js";
-import { TransientInput } from "@/lib/transientInput.js";
+import { Popover } from "@/lib/popover.js";
 
 /**
  * A text box component for freeform text input within the workspace.
@@ -47,7 +47,7 @@ export class TextBox {
             if (event.button !== 2) { return; }
             event.preventDefault();
 
-            const popUpContextMenu = new TransientInput(this.el.baseContainer, { x: event.pageX, y: event.pageY });
+            const popUpContextMenu = new Popover(this.el.baseContainer, { x: event.pageX, y: event.pageY });
             popUpContextMenu.createAndAddLabel(this.constructor.name);
             popUpContextMenu.createAndAddDivisor();
 
@@ -59,7 +59,7 @@ export class TextBox {
                 });
             }
 
-            popUpContextMenu.endTransientInput();
+            popUpContextMenu.endPopover();
         });
     }
 
