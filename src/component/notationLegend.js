@@ -1,5 +1,5 @@
 import { DragHandle } from "@/component/dragHandle.js";
-import { TransientInput } from "@/lib/transientInput.js";
+import { Popover } from "@/lib/popover.js";
 
 export class NotationLegend {
     constructor(workspace, textContent = '') {
@@ -136,7 +136,7 @@ class TechniqueEntry{
         this.componentContainer.addEventListener('mousedown', (event) => {
             if (event.button == 2){
                 event.preventDefault()
-                const editEntryMenu = new TransientInput(this.componentContainer, {x: event.pageX,y: event.pageY});
+                const editEntryMenu = new Popover(this.componentContainer, {x: event.pageX,y: event.pageY});
                 editEntryMenu.createAndAddLabel('Notation legend entry');
                 editEntryMenu.createAndAddDivisor();
                 editEntryMenu.createAndAddButton('edit text', ()=>{
@@ -154,7 +154,7 @@ class TechniqueEntry{
                     this.remove();
                     return true;
                 });
-                editEntryMenu.endTransientInput();
+                editEntryMenu.endPopover();
             } else {
 
             }

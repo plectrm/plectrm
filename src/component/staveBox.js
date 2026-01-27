@@ -1,5 +1,5 @@
 import { DragHandle } from "@/component/dragHandle.js";
-import { TransientInput } from "@/lib/transientInput.js";
+import { Popover } from "@/lib/popover.js";
 
 export class StaveBox {
     /**
@@ -58,7 +58,7 @@ export class StaveBox {
             if (event.button !== 2) { return; }
             event.preventDefault();
 
-            const popUpContextMenu = new TransientInput(this.el.baseContainer, { x: event.pageX, y: event.pageY });
+            const popUpContextMenu = new Popover(this.el.baseContainer, { x: event.pageX, y: event.pageY });
             popUpContextMenu.createAndAddLabel(this.constructor.name);
             popUpContextMenu.createAndAddDivisor();
             
@@ -70,7 +70,7 @@ export class StaveBox {
                 });
             }
             
-            popUpContextMenu.endTransientInput();
+            popUpContextMenu.endPopover();
         });
 
     }
@@ -501,7 +501,7 @@ class staveTuning {
             if (event.button !== 0) { return; }
             event.preventDefault();
 
-            const changeTuningMenu = new TransientInput(this.el.baseContainer, {x: event.pageX, y: event.pageY});
+            const changeTuningMenu = new Popover(this.el.baseContainer, {x: event.pageX, y: event.pageY});
             changeTuningMenu.createAndAddLabel('Tuning:');
             changeTuningMenu.createAndAddTextInput(this.staveBox.tuning.join('/'), (contents) => {
                 if (!contents.includes('/')) { return false; };
@@ -511,7 +511,7 @@ class staveTuning {
                 this.updateTuning(newTuning);
                 return true;
             })
-            changeTuningMenu.endTransientInput();
+            changeTuningMenu.endPopover();
         });
     }
 
@@ -607,10 +607,10 @@ class staveEnd {
             
             const rect = this.staveBox.el.baseContainer.getBoundingClientRect();
             
-            this.lengthHelper = new TransientInput(event.target, {x: rect.right, y: rect.bottom});
+            this.lengthHelper = new Popover(event.target, {x: rect.right, y: rect.bottom});
             this.lengthHelper.createAndAddLabel('length');
             this.lengthHelper.createAndAddLabel(() => `${this.staveBox.length}`);
-            this.lengthHelper.endTransientInput();
+            this.lengthHelper.endPopover();
 
             this.el.baseContainer.classList.add('focus');
             document.body.style.cursor = 'col-resize';
