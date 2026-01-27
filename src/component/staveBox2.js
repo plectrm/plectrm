@@ -133,6 +133,33 @@ export class StaveBox2 {
         this.el.baseContainer.insertAdjacentElement('afterend', cloneStavebox.el.baseContainer);
         this.parentWorkspace.ChildObjects.splice(index + 1, 0, cloneStavebox);
     }
+
+    /**
+     * Parses the staveBox contents into a formatted string for export.
+     * Format: TuningLabel|cellvalues|
+     * @returns {string} The parsed string representation.
+     */
+    parseStringContents(){
+        const tuning = this.tuning;
+        let textBuffer = ``;
+        let hasAccidentals = /[#b]/.test(tuning);
+
+        for (let row = 0; row < tuning.length; row++){
+            const stringLabel = tuning.at(tuning.length - (row + 1));
+            if ((stringLabel.length > 1) || !hasAccidentals){
+                textBuffer += `${stringLabel}|`;
+            } else {
+                textBuffer += `${stringLabel} |`;
+            }
+            const cellRow = this.cellArray[row];
+            cellRow.forEach((cell) => {
+                textBuffer += cell.value;
+            });
+            textBuffer += '|\n';
+        }
+
+        return textBuffer;
+    }
 }
 
 /**
@@ -511,7 +538,7 @@ class staveTuning {
 
         const prevTuning = this.staveBox.tuning;
         
-        if(newTuning === prevTuning.length){
+        if (newTuning.length === prevTuning.length){
             this.staveBox.tuning = newTuning;
         } else if (newTuning.length > prevTuning.length){
             this.staveBox.tuning = newTuning;
