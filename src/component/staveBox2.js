@@ -136,7 +136,6 @@ export class StaveBox2 {
 
     /**
      * Parses the staveBox contents into a formatted string for export.
-     * Format: TuningLabel|cellvalues|
      * @returns {string} The parsed string representation.
      */
     parseStringContents(){
