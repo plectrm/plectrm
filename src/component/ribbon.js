@@ -48,15 +48,18 @@ export function AddStaveBoxButton(ribbon, workspace) {
         staveBoxOptionsMenu.createAndAddLabel('StaveBox settings');
         staveBoxOptionsMenu.createAndAddDivisor();
         staveBoxOptionsMenu.createAndAddLabel('tuning');
-        staveBoxOptionsMenu.createAndAddTextInput(button.options.tuning, (contents) => {
-          if (!contents.includes('/')) { return false; };
-          contents = contents.trim();
-          button.options.tuning = contents;
+        const initialTuning = button.options.tuning.split('/').filter(Boolean);
+        staveBoxOptionsMenu.createAndAddArrayInput(initialTuning, (newTuning) => {
+          if (newTuning.length === 0) { return false; }
+          button.options.tuning = newTuning.join('/');
           return true;
-        }, /^[A-Za-z/# ]+$/)
+        }, {
+          regex: /^[A-Za-z#b0-9]$/
+        })
         staveBoxOptionsMenu.createAndAddLabel('size');
         staveBoxOptionsMenu.createAndAddTextInput(button.options.size, (contents) => {
           contents = parseInt(contents);
+          console.log(contents)
           if (!Number.isFinite(contents)) { return false; }
           if (contents < 1 || contents > 70) { return false;  }
           button.options.size = contents;

@@ -145,6 +145,132 @@ export class Popover {
     }
 
     /**
+     * Creates and adds an array input optimized for entering tunings or lists.
+     * Each item is displayed in its own chip/box.
+     * @param {string[]} initialArray - Initial array of strings.
+     * @param {Function} submitFn - Callback receiving the array of strings. Should return true if valid.
+     * @param {Object} [options] - Optional configuration.
+     * @param {RegExp} [options.regex] - Regex pattern for allowed characters in each item.
+     * @param {string} [options.delimiter=' '] - Key that triggers creating a new item.
+     */
+    createAndAddArrayInput(initialArray, submitFn, options = {}) {
+        const { regex = /[\s\S]/, delimiter = ' ' } = options;
+
+        const container = document.createElement('div');
+        container.classList.add('popoverItem', 'popoverArrayInput');
+        this.popoverContainer.appendChild(container);
+
+        let items = initialArray.length > 0 ? [...initialArray] : [''];
+
+        const getChipText = (chip) => chip.firstChild?.nodeValue || '';
+
+        const render = () => {
+            container.innerHTML = '';
+
+            items.forEach((item, index) => {
+                const chip = document.createElement('div');
+                chip.classList.add('arrayInputChip');
+                chip.contentEditable = 'true';
+                chip.spellcheck = false;
+                chip.appendChild(document.createTextNode(item));
+
+                chip.addEventListener('input', () => {
+                    items[index] = getChipText(chip);
+                });
+
+                chip.addEventListener('keydown', (event) => {
+                    container.classList.remove('error');
+                    const key = event.key;
+                    const text = getChipText(chip);
+
+                    if (key === 'Enter') {
+                        event.preventDefault();
+                        this.submit();
+                        return;
+                    }
+
+                    if (key === delimiter) {
+                        event.preventDefault();
+                        items.splice(index + 1, 0, '');
+                        render();
+                        container.children[index + 1]?.focus();
+                        return;
+                    }
+
+                    if (key === 'Backspace' && text === '' && items.length > 1) {
+                        event.preventDefault();
+                        items.splice(index, 1);
+                        render();
+                        const targetIndex = Math.max(0, index - 1);
+                        container.children[targetIndex]?.focus();
+                        return;
+                    }
+
+                    if (key === 'Delete' && text === '' && items.length > 1) {
+                        event.preventDefault();
+                        items.splice(index, 1);
+                        render();
+                        container.children[index]?.focus();
+                        return;
+                    }
+
+                    if (key === 'ArrowRight' || key === 'ArrowLeft') {
+                        const sel = window.getSelection();
+                        if (!sel.rangeCount) return;
+                        
+                        const range = sel.getRangeAt(0);
+                        const atEnd = range.endOffset >= text.length;
+                        const atStart = range.startOffset === 0;
+
+                        if (key === 'ArrowRight' && atEnd && index < items.length - 1) {
+                            event.preventDefault();
+                            container.children[index + 1]?.focus();
+                        }
+                        if (key === 'ArrowLeft' && atStart && index > 0) {
+                            event.preventDefault();
+                            container.children[index - 1]?.focus();
+                        }
+                        return;
+                    }
+
+                    if (key.length === 1 && !regex.test(key)) {
+                        event.preventDefault();
+                    }
+                });
+
+                container.appendChild(chip);
+            });
+        };
+
+        render();
+
+        this.callbackList.push({
+            fn: () => {
+                const result = [];
+                const chips = container.querySelectorAll('.arrayInputChip:not(.arrayInputChipEmpty)');
+                chips.forEach(chip => {
+                    const text = getChipText(chip).trim();
+                    if (text) result.push(text);
+                });
+
+                if (result.length === 0) {
+                    container.classList.add('error');
+                    return false;
+                }
+
+                container.classList.remove('error');
+                return submitFn(result);
+            },
+            param: null,
+            el: container
+        });
+
+        setTimeout(() => {
+            container.querySelector('.arrayInputChip')?.focus();
+        }, 0);
+    }
+
+    /**
      * Submits all callback functions in the queue.
      * Removes the popover if all callbacks return true.
      * Shows error styling on items that return false.
