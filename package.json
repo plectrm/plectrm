@@ -9,7 +9,8 @@
     "dev": "concurrently -k -s first \"npm:dev:vite\" \"npm:dev:electron\"",
     "build": "vite build",
     "app:dir": "npm run build && electron-builder --dir",
-    "app:dist": "npm run build && electron-builder"
+    "app:dist": "npm run build && electron-builder",
+    "app:publish": "npm run build && electron-builder --publish=always"
   },
   "author": "memrye",
   "license": "GPL-3.0-only",
@@ -21,15 +22,65 @@
     "vite": "^7.1.5",
     "wait-on": "^8.0.5"
   },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
   "build": {
     "productName": "plectrm",
     "appId": "com.memrye.plectrm",
-    "mac": {
-      "category": "public.app-category.productivity"
+    "copyright": "Copyright © 2026 memrye",
+    "directories": {
+      "output": "release"
     },
     "files": [
-      "**/*",
-      "dist"
-    ]
+      "src/**/*",
+      "dist/**/*",
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        }
+      ],
+      "category": "Office"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "memrye",
+      "repo": "plectrm",
+      "releaseType": "release"
+    }
   }
 }
