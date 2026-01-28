@@ -2,6 +2,9 @@ import { StaveBox } from "@/component/staveBox";
 import { TextBox } from "@/component/textBox";
 import { requestImportFile } from "@/lib/importFile";
 
+// Version is injected at build time via vite
+const APP_VERSION = __APP_VERSION__;
+
 export function initStartscreen(foreground, workspace) {
 
     foreground.newWindow(() => {
@@ -22,8 +25,31 @@ export function initStartscreen(foreground, workspace) {
                 Import Project
             </button>
         </div>
+        <div class='version-info'>
+            <span class='version-number'>v${APP_VERSION}</span>
+            <span class='update-status'></span>
+        </div>
         `;
         foreground.el.appendChild(startscreenContainer);
+
+        // Set up update status listener
+        const updateStatusEl = startscreenContainer.querySelector('.update-status');
+        if (updateStatusEl && window.electronAPI) {
+            window.electronAPI.onUpdateAvailable((info) => {
+                updateStatusEl.innerHTML = `<button class='updateButton'>Update to v${info.version} available</button>`;
+                updateStatusEl.querySelector('.updateButton').addEventListener('click', () => {
+                    // Show downloading state
+                    updateStatusEl.innerHTML = '<div class="downloading">Downloading update...</div>';
+                });
+            });
+
+            window.electronAPI.onUpdateDownloaded((info) => {
+                updateStatusEl.innerHTML = `<button class='updateButton ready'>Restart to update to v${info.version}</button>`;
+                updateStatusEl.querySelector('.updateButton').addEventListener('click', () => {
+                    window.electronAPI.installUpdate();
+                });
+            });
+        }
 
         const newProjectButton = document.querySelector('#newProject');
         if (!newProjectButton) {

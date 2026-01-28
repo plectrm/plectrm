@@ -2,6 +2,17 @@ const { app, BrowserWindow, ipcMain, dialog, nativeImage } = require('electron/m
 const path = require('node:path')
 const fs = require('fs').promises;
 
+// Auto-updater - only load in production
+let autoUpdater;
+if (process.env.NODE_ENV !== 'development') {
+  const { autoUpdater: updater } = require('electron-updater');
+  autoUpdater = updater;
+  
+  // Configure auto-updater
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+}
+
 ipcMain.handle('dialog:save-text-file', async (event, content, defaultFilename = 'untitledTab.txt') => {
   const { window } = BrowserWindow.fromWebContents(event.sender);
 
@@ -83,20 +94,103 @@ const createWindow = () => {
   } else {
     win.loadFile(path.join(__dirname, '../dist/index.html'));
   }
+
+  return win;
+}
+
+// Auto-update setup function
+function setupAutoUpdater(mainWindow) {
+  if (!autoUpdater) return;
+
+  // Log events for debugging
+  autoUpdater.logger = console;
+  autoUpdater.logger.transports.file.level = 'info';
+
+  // Check for updates
+  autoUpdater.checkForUpdatesAndNotify().catch(err => {
+    console.log('Error checking for updates:', err);
+  });
+
+  // Event: Update available
+  autoUpdater.on('update-available', (info) => {
+    console.log('Update available:', info);
+    mainWindow.webContents.send('update-available', {
+      version: info.version,
+      releaseDate: info.releaseDate,
+      releaseNotes: info.releaseNotes
+    });
+  });
+
+  // Event: Update not available
+  autoUpdater.on('update-not-available', () => {
+    console.log('Update not available');
+    mainWindow.webContents.send('update-not-available');
+  });
+
+  // Event: Download progress
+  autoUpdater.on('download-progress', (progressObj) => {
+    const logMessage = `Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent}% (${progressObj.transferred}/${progressObj.total})`;
+    console.log(logMessage);
+    mainWindow.webContents.send('download-progress', progressObj);
+  });
+
+  // Event: Update downloaded
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('Update downloaded');
+    mainWindow.webContents.send('update-downloaded', {
+      version: info.version,
+      releaseDate: info.releaseDate
+    });
+    
+    // Optional: Show dialog asking user to restart now
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Update Ready',
+      message: `A new version (${info.version}) has been downloaded.`,
+      detail: 'The update will be installed when you restart the application. Would you like to restart now?',
+      buttons: ['Restart Now', 'Later'],
+      defaultId: 0
+    }).then((result) => {
+      if (result.response === 0) {
+        autoUpdater.quitAndInstall(false, true);
+      }
+    });
+  });
+
+  // Event: Error
+  autoUpdater.on('error', (err) => {
+    console.error('Auto-updater error:', err);
+  });
+
+  // IPC handlers for manual update check
+  ipcMain.on('check-for-updates', () => {
+    autoUpdater.checkForUpdates().catch(err => {
+      console.log('Manual update check error:', err);
+    });
+  });
+
+  ipcMain.on('install-update', () => {
+    autoUpdater.quitAndInstall(false, true);
+  });
 }
 
 app.whenReady().then(() => {
-  createWindow()
+  const mainWindow = createWindow();
+
+  // Setup auto-updater after window is created
+  if (process.env.NODE_ENV !== 'development') {
+    setupAutoUpdater(mainWindow);
+  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
+      createWindow();
     }
-  })
-})
+  });
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit()
+    app.quit();
   }
-})
+});
