@@ -1054,12 +1054,10 @@ body{
     margin: auto;
 }
 
-/* Version info on start screen */
 .version-info{
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
     margin-top: 1rem;
     color: var(--color-light-tertiary);
     font-size: 0.8rem;
@@ -1070,15 +1068,12 @@ body{
     opacity: 0.7;
 }
 
-.update-status{
-    min-height: 1.5rem;
-}
-
 .updateButton{
     background: transparent;
     border: 1px solid var(--color-blue);
     color: var(--color-blue);
     padding: 0.4rem 0.8rem;
+    margin-top: 0.5rem;
     border-radius: 0.3rem;
     cursor: pointer;
     font-family: inherit;
@@ -1108,6 +1103,14 @@ body{
 }
 
 .update-status .downloading{
-    color: var(--color-blue);
-    font-style: italic;
+    border: 1px solid var(--color-blue);
+    background: var(--color-blue);
+    color: var(--color-dark-primary);
+    padding: 0.4rem 0.8rem;
+    margin-top: 0.5rem;
+    border-radius: 0.3rem;
+    cursor: wait;
+    font-family: inherit;
+    font-size: 0.8rem;
+    transition: all 150ms ease;
 }

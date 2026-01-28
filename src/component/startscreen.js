@@ -39,7 +39,7 @@ export function initStartscreen(foreground, workspace) {
                 updateStatusEl.innerHTML = `<button class='updateButton'>Update to v${info.version} available</button>`;
                 updateStatusEl.querySelector('.updateButton').addEventListener('click', () => {
                     // Show downloading state
-                    updateStatusEl.innerHTML = '<span class="downloading">Downloading update...</span>';
+                    updateStatusEl.innerHTML = '<div class="downloading">Downloading update...</div>';
                 });
             });
 
