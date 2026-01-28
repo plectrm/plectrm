@@ -1,6 +1,6 @@
 {
   "name": "plectrm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "ASCII Tab Editor",
   "main": "src/main.js",
   "scripts": {
