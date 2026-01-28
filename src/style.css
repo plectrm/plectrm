@@ -934,9 +934,6 @@ body{
 
 .popoverItem.popoverLabel{
     user-select: none;
-}
-
-.popoverItem.popoverLabel:first-of-type{
     font-weight: bold;
 }
 
@@ -956,6 +953,45 @@ body{
     padding: 0;
 }
 
+.popoverItem.popoverArrayInput{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4em;
+    padding: 0.5em 1em;
+    max-width: 100%;
+    min-height: 2.5em;
+    align-items: flex-start;
+}
+
+.popoverItem.popoverArrayInput.error{
+    outline: 2px solid var(--color-red);
+    border-radius: 0.3rem;
+}
+
+.arrayInputChip{
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--color-dark-primary);
+    border: 1px solid var(--color-dark-tertiary);
+    border-radius: 0.3rem;
+    padding: 0.2em 0.4em;
+    min-width: 1.6em;
+    min-height: 1.6em;
+    transition: all 80ms ease-in-out;
+    cursor: text;
+    outline: none;
+    white-space: nowrap;
+}
+
+.arrayInputChip:hover{
+    background-color: var(--color-dark-secondary);
+    border-color: var(--color-dark-tertiary);
+}
+
+.arrayInputChip:focus{
+    background-color: var(--color-dark-tertiary);
+    border-color: var(--color-light-tertiary);
+}
 
 .startscreen-container{
     margin: auto;

@@ -502,15 +502,16 @@ class staveTuning {
             event.preventDefault();
 
             const changeTuningMenu = new Popover(this.el.baseContainer, {x: event.pageX, y: event.pageY});
-            changeTuningMenu.createAndAddLabel('Tuning:');
-            changeTuningMenu.createAndAddTextInput(this.staveBox.tuning.join('/'), (contents) => {
-                if (!contents.includes('/')) { return false; };
-                contents = contents.trim();
-                let newTuning = contents.split('/');
-                newTuning = newTuning.filter(Boolean);
+            changeTuningMenu.createAndAddLabel('change tuning');
+            changeTuningMenu.createAndAddDivisor();
+            changeTuningMenu.createAndAddArrayInput(this.staveBox.tuning, (newTuning) => {
+                if (newTuning.length === 0) { return false; }
                 this.updateTuning(newTuning);
                 return true;
-            })
+            }, {
+                regex: /^[A-Za-z#b0-9]$/
+            });
+            changeTuningMenu.createAndAddButton('submit', () => true)
             changeTuningMenu.endPopover();
         });
     }
