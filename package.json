@@ -12,7 +12,7 @@
     "app:dist": "npm run build && electron-builder",
     "app:publish": "npm run build && electron-builder --publish=always"
   },
-  "author": "memrye",
+  "author": "memrye <maevecrancher@protonmail.com>",
   "license": "GPL-3.0-only",
   "devDependencies": {
     "concurrently": "^9.2.1",
@@ -74,7 +74,13 @@
           "arch": ["x64"]
         }
       ],
-      "category": "Office"
+      "category": "Office",
+      "icon": "build/icons",
+      "desktop": {
+        "entry": {
+          "StartupWMClass": "plectrm"
+        }
+      }
     },
     "publish": {
       "provider": "github",
