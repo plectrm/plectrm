@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Plectrm
+Comment=ASCII Tab Editor
+Exec=plectrm %U
+Icon=plectrm
+Type=Application
+Categories=Office;AudioVideo;
+StartupWMClass=plectrm
