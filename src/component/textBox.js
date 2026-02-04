@@ -5,6 +5,9 @@ import { Popover } from "@/lib/popover.js";
  * A text box component for freeform text input within the workspace.
  */
 export class TextBox {
+    /** @type {string} - Display name for context menus (minification-safe) */
+    static displayName = 'textBox';
+
     /**
      * Creates a TextBox.
      * @param {Workspace} workspace - The parent workspace for the textBox.
@@ -48,7 +51,7 @@ export class TextBox {
             event.preventDefault();
 
             const popUpContextMenu = new Popover(this.el.baseContainer, { x: event.pageX, y: event.pageY });
-            popUpContextMenu.createAndAddLabel(this.constructor.name);
+            popUpContextMenu.createAndAddLabel(this.constructor.displayName);
             popUpContextMenu.createAndAddDivisor();
 
             for (let i = 0; i < this.contextMenuOptions.length; i++) {
