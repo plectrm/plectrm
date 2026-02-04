@@ -53,6 +53,8 @@ export class StaveBox {
         /** @member {Array} contextMenuOptions - Options for the right-click context menu */
         this.contextMenuOptions = [
             { label: 'duplicate', func: this.duplicate },
+            { label: 'change tuning', func: this.openChangeTuningMenu },
+            { label: 'clear', func: this.clearGrid },
             { label: 'remove', func: this.remove }
         ];
 
@@ -84,6 +86,26 @@ export class StaveBox {
      */
     getRootContainer(){
         return this.el.baseContainer;
+    }
+
+    /**
+     * Opens the change tuning popover menu at a default position.
+     */
+    openChangeTuningMenu() {
+        const rect = this.el.baseContainer.getBoundingClientRect();
+        this.staveTuning.openTuningMenu(rect.left + 50, rect.top + 50);
+    }
+
+    /**
+     * Clears all cells in the staveGrid, resetting them to the default value.
+     */
+    clearGrid() {
+        for (let row = 0; row < this.cellArray.length; row++) {
+            for (let col = 0; col < this.cellArray[row].length; col++) {
+                this.cellArray[row][col].value = '-';
+            }
+        }
+        this.staveGrid.redrawGrid();
     }
 
     /**
@@ -503,20 +525,28 @@ class staveTuning {
         this.el.baseContainer.addEventListener('mousedown', (event) => {
             if (event.button !== 0) { return; }
             event.preventDefault();
-
-            const changeTuningMenu = new Popover(this.el.baseContainer, {x: event.pageX, y: event.pageY});
-            changeTuningMenu.createAndAddLabel('change tuning');
-            changeTuningMenu.createAndAddDivisor();
-            changeTuningMenu.createAndAddArrayInput(this.staveBox.tuning, (newTuning) => {
-                if (newTuning.length === 0) { return false; }
-                this.updateTuning(newTuning);
-                return true;
-            }, {
-                regex: /^[A-Za-z#b0-9]$/
-            });
-            changeTuningMenu.createAndAddButton('submit', () => true)
-            changeTuningMenu.endPopover();
+            this.openTuningMenu(event.pageX, event.pageY);
         });
+    }
+
+    /**
+     * Opens the change tuning popover menu.
+     * @param {number} x - X coordinate for popover position.
+     * @param {number} y - Y coordinate for popover position.
+     */
+    openTuningMenu(x, y) {
+        const changeTuningMenu = new Popover(this.el.baseContainer, {x, y});
+        changeTuningMenu.createAndAddLabel('change tuning');
+        changeTuningMenu.createAndAddDivisor();
+        changeTuningMenu.createAndAddArrayInput(this.staveBox.tuning, (newTuning) => {
+            if (newTuning.length === 0) { return false; }
+            this.updateTuning(newTuning);
+            return true;
+        }, {
+            regex: /^[A-Za-z#b0-9]$/
+        });
+        changeTuningMenu.createAndAddButton('submit', () => true)
+        changeTuningMenu.endPopover();
     }
 
     updateTuning(_tuning){
