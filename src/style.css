@@ -56,7 +56,7 @@ body{
     width: 100%;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--color-dark-secondary) transparent;
+    scrollbar-color: var(--color-light-secondary) transparent;
     padding: 1em;
 }
 
@@ -98,12 +98,12 @@ body{
     color: var(--color-light-primary);
 }
 
-.ribbonButton:hover{
+.ribbonButton:not(:disabled):hover{
     background-color: var(--color-dark-secondary);
 }
 
-.ribbonButton:active,
-.ribbonButton.focus{
+.ribbonButton:not(:disabled):active,
+.ribbonButton:not(:disabled).focus{
     border: 1px solid var(--color-light-tertiary);
     background-color: var(--color-dark-tertiary);
 }
@@ -111,6 +111,10 @@ body{
 .ribbonButton svg{
     width: 50%;
     height: 50%;
+}
+
+.ribbonButton:disabled{
+    color: var(--color-dark-secondary);
 }
 
 .ribbonSplitDropdown{
@@ -179,6 +183,39 @@ body{
     height: 100%;
 }
 
+.ribbonZoomControls{
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    border: 1px solid var(--color-dark-secondary);
+    border-radius: 0.5rem;
+    justify-content: space-between;
+}
+
+.ribbonZoomButtonRow{
+    display: flex;
+    flex-direction: row;
+    gap: 0.25rem;
+    height: 50%;
+}
+
+.ribbonZoomControls .ribbonButton{
+    width: 100%;
+    overflow: hidden;
+    aspect-ratio: unset;
+    border-radius: 0.25rem;
+}
+
+
+.ribbonZoomButtonRow .ribbonButton{
+    width: 100%;
+    overflow: hidden;
+    aspect-ratio: 1/1;
+    border-radius: 0.25rem;
+    padding: 0 4px;
+}
+
 .exportButton{
     display: flex;
     transition: all 80ms ease-in-out;
@@ -226,6 +263,9 @@ body{
     display: flex;
     flex-direction: column;
     gap: 1em;
+    transform-origin: 0 0;
+    text-rendering: geometricPrecision;
+    will-change: transform;
 }
 
 .workspaceContainer:focus{

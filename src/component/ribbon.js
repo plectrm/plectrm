@@ -90,3 +90,77 @@ export function AddNotationLegendButton(ribbon, workspace){
     
     return button;
 }
+
+export function AddZoomControls(ribbon, workspace) {
+    const controls = {
+        el: {}
+    };
+
+    // Create a container for zoom controls
+    controls.el.container = document.createElement('div');
+    controls.el.container.classList.add('ribbonZoomControls');
+
+    // Create a row container for the +/- buttons
+    controls.el.buttonRow = document.createElement('div');
+    controls.el.buttonRow.classList.add('ribbonZoomButtonRow');
+
+    // Zoom out button
+    controls.el.zoomOut = document.createElement('button');
+    controls.el.zoomOut.classList.add('ribbonButton');
+    controls.el.zoomOut.innerHTML = '-';
+    controls.el.zoomOut.title = "Zoom Out";
+    controls.el.zoomOut.onclick = function() {
+        workspace.zoomOut();
+        updateButtonStates();
+    };
+
+    // Zoom in button
+    controls.el.zoomIn = document.createElement('button');
+    controls.el.zoomIn.classList.add('ribbonButton');
+    controls.el.zoomIn.innerHTML = '+';
+    controls.el.zoomIn.title = "Zoom In";
+    controls.el.zoomIn.onclick = function() {
+        workspace.zoomIn();
+        updateButtonStates();
+    };
+
+    // Reset button
+    controls.el.reset = document.createElement('button');
+    controls.el.reset.classList.add('ribbonButton');
+    controls.el.reset.innerHTML = 'reset';
+    controls.el.reset.title = "Reset View (Ctrl+0)";
+    controls.el.reset.onclick = function() {
+        workspace.resetView();
+        updateButtonStates();
+    };
+
+    // Add +/- buttons to the row
+    controls.el.buttonRow.appendChild(controls.el.zoomOut);
+    controls.el.buttonRow.appendChild(controls.el.zoomIn);
+
+    // Add row and reset button to the container
+    controls.el.container.appendChild(controls.el.buttonRow);
+    controls.el.container.appendChild(controls.el.reset);
+    ribbon.appendChild(controls.el.container);
+
+    // Update button disabled states based on current zoom/pan
+    function updateButtonStates() {
+        // Disable zoom out at min scale
+        controls.el.zoomOut.disabled = workspace.scale <= workspace.minScale;
+        // Disable zoom in at max scale  
+        controls.el.zoomIn.disabled = workspace.scale >= workspace.maxScale;
+        // Disable reset when already at default
+        controls.el.reset.disabled = (workspace.scale === 1 && workspace.panX === 0 && workspace.panY === 0);
+    }
+
+    // Initial state update
+    updateButtonStates();
+
+    // Connect to workspace view changes (for keyboard shortcuts, scroll zoom, pan)
+    workspace.onViewChanged = updateButtonStates;
+
+    // Store reference to update function on controls for external access
+    controls.updateButtonStates = updateButtonStates;
+
+    return controls;
+}

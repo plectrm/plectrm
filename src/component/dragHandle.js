@@ -49,14 +49,16 @@ export class DragHandle {
         const elementDragging = (event) => {
             const mouseY = event.clientY;
             const elementRect = parentContainer.getBoundingClientRect();
-            let distanceY = mouseY - elementCenterY;
+            // Convert screen pixel distance to local coordinates (accounting for workspace zoom)
+            let distanceY = (mouseY - elementCenterY) / workspace.scale;
             parentContainer.style.transform = `translateY(${distanceY + yOffset}px) scale(102%)`
 
 
             //dragging up
             if (previousElement){
                 if (elementRect.top < (previousElementRect.top + (previousElementRect.height / 2))){
-                    yOffset += previousElementRect.height + (workspace.emSize.height);
+                    // Convert screen pixels to local pixels for offset
+                    yOffset += (previousElementRect.height + (workspace.emSize.height * workspace.scale)) / workspace.scale;
                     parentContainer.style.transform = `translateY(${distanceY + yOffset}px) scale(102%)`;
 
                     if (previousElement){previousElement.classList.toggle('glowBelow', false)};
@@ -86,7 +88,8 @@ export class DragHandle {
             //dragging down
             if (nextElement){
                 if (elementRect.bottom > (nextElementRect.bottom - (nextElementRect.height/2))){
-                    yOffset -= nextElementRect.height + (workspace.emSize.height);
+                    // Convert screen pixels to local pixels for offset
+                    yOffset -= (nextElementRect.height + (workspace.emSize.height * workspace.scale)) / workspace.scale;
                     parentContainer.style.transform = `translateY(${distanceY + yOffset}px) scale(102%)`;
 
                     if (previousElement){previousElement.classList.toggle('glowBelow', false)};
