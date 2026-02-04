@@ -2,6 +2,9 @@ import { DragHandle } from "@/component/dragHandle.js";
 import { Popover } from "@/lib/popover.js";
 
 export class StaveBox {
+    /** @type {string} - Display name for context menus (minification-safe) */
+    static displayName = 'staveBox';
+
     /**
      * Creates a staveBox.
      * @param {Workspace} workspace - The parent workspace for the staveBox.
@@ -59,7 +62,7 @@ export class StaveBox {
             event.preventDefault();
 
             const popUpContextMenu = new Popover(this.el.baseContainer, { x: event.pageX, y: event.pageY });
-            popUpContextMenu.createAndAddLabel(this.constructor.name);
+            popUpContextMenu.createAndAddLabel(this.constructor.displayName);
             popUpContextMenu.createAndAddDivisor();
             
             for (let i = 0; i < this.contextMenuOptions.length; i++) {

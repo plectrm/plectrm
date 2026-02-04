@@ -2,6 +2,9 @@ import { DragHandle } from "@/component/dragHandle.js";
 import { Popover } from "@/lib/popover.js";
 
 export class NotationLegend {
+    /** @type {string} - Display name for context menus (minification-safe) */
+    static displayName = 'notationLegend';
+
     constructor(workspace, textContent = '') {
 
         this.parentWorkspace = workspace;
@@ -55,10 +58,6 @@ export class NotationLegend {
 
     getRootContainer(){
         return this.componentContainer;
-    }
-
-    getObjectNameAsString(){
-        return 'Notation Legend'
     }
 
     decPositionInWorkspace(){
