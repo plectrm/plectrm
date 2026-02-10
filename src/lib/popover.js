@@ -53,7 +53,7 @@ export class Popover {
     /**
      * Creates and adds a clickable button to the popover.
      * @param {string} textLabel - The text to display on the button.
-     * @param {Function} clickFn - Callback function executed when button is clicked. Should return true on success.
+     * @param {Function} clickFn - Callback function executed when button is clicked. Receives click event as parameter. Should return true on success.
      */
     createAndAddButton(textLabel, clickFn) {
         const popoverButton = document.createElement('div');
@@ -61,8 +61,8 @@ export class Popover {
         popoverButton.textContent = textLabel;
         this.popoverContainer.appendChild(popoverButton);
 
-        popoverButton.addEventListener('click', () => {
-            this.callbackList.push({fn: clickFn, param: null, el: popoverButton});
+        popoverButton.addEventListener('click', (event) => {
+            this.callbackList.push({fn: clickFn, param: event, el: popoverButton});
             this.submit();
         })
     }

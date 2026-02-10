@@ -1,5 +1,6 @@
 import { DragHandle } from "@/component/dragHandle.js";
 import { Popover } from "@/lib/popover.js";
+import { ConfirmationDialog } from "@/lib/foreground.js";
 
 /**
  * A text box component for freeform text input within the workspace.
@@ -22,7 +23,7 @@ export class TextBox {
         /** @member {Array} contextMenuOptions - Options for the right-click context menu */
         this.contextMenuOptions = [
             { label: 'duplicate', func: this.duplicate },
-            { label: 'remove', func: this.remove }
+            { label: 'remove', func: this.confirmRemove }
         ];
 
         this.el.baseContainer = document.createElement('div');
@@ -55,9 +56,9 @@ export class TextBox {
             popUpContextMenu.createAndAddDivisor();
 
             for (let i = 0; i < this.contextMenuOptions.length; i++) {
-                popUpContextMenu.createAndAddButton(this.contextMenuOptions[i].label, () => {
+                popUpContextMenu.createAndAddButton(this.contextMenuOptions[i].label, (event) => {
                     const f = this.contextMenuOptions[i].func.bind(this);
-                    f();
+                    f(event);
                     return true;
                 });
             }
@@ -103,6 +104,20 @@ export class TextBox {
         const index = this.parentWorkspace.ChildObjects.indexOf(this);
         this.parentWorkspace.ChildObjects.splice(index, 1);
         this.el.baseContainer.remove();
+    }
+
+    /**
+     * Shows a confirmation dialog before removing this textBox.
+     */
+    confirmRemove(event) {
+        if (event?.shiftKey) {
+            this.remove();
+            return;
+        }
+        new ConfirmationDialog(
+            'Delete this text box?',
+            () => this.remove()
+        );
     }
 
     /**

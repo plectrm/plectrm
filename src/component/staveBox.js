@@ -1,5 +1,6 @@
 import { DragHandle } from "@/component/dragHandle.js";
 import { Popover } from "@/lib/popover.js";
+import { ConfirmationDialog } from "@/lib/foreground.js";
 
 export class StaveBox {
     /** @type {string} - Display name for context menus (minification-safe) */
@@ -54,8 +55,8 @@ export class StaveBox {
         this.contextMenuOptions = [
             { label: 'duplicate', func: this.duplicate },
             { label: 'change tuning', func: this.openChangeTuningMenu },
-            { label: 'clear', func: this.clearGrid },
-            { label: 'remove', func: this.remove }
+            { label: 'clear', func: this.confirmClearGrid },
+            { label: 'remove', func: this.confirmRemove }
         ];
 
         // Right-click context menu handler on the entire component
@@ -68,9 +69,9 @@ export class StaveBox {
             popUpContextMenu.createAndAddDivisor();
             
             for (let i = 0; i < this.contextMenuOptions.length; i++) {
-                popUpContextMenu.createAndAddButton(this.contextMenuOptions[i].label, () => {
+                popUpContextMenu.createAndAddButton(this.contextMenuOptions[i].label, (event) => {
                     const f = this.contextMenuOptions[i].func.bind(this);
-                    f();
+                    f(event);
                     return true;
                 });
             }
@@ -136,6 +137,34 @@ export class StaveBox {
         const index = this.parentWorkspace.ChildObjects.indexOf(this);
         this.parentWorkspace.ChildObjects.splice(index, 1);
         this.el.baseContainer.remove();
+    }
+
+    /**
+     * Shows a confirmation dialog before removing this staveBox.
+     */
+    confirmRemove(event){
+        if (event?.shiftKey) {
+            this.remove();
+            return;
+        }
+        new ConfirmationDialog(
+            'Delete this stave?',
+            () => this.remove()
+        );
+    }
+
+    /**
+     * Shows a confirmation dialog before clearing the grid.
+     */
+    confirmClearGrid(event){
+        if (event?.shiftKey) {
+            this.clearGrid();
+            return;
+        }
+        new ConfirmationDialog(
+            'Clear contents of this stave?',
+            () => this.clearGrid()
+        );
     }
 
     /**
