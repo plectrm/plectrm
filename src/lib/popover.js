@@ -48,17 +48,59 @@ export class Popover {
         setTimeout(()=>{
             document.addEventListener('mousedown', this.clickHandler)
         }, 0);
+
+        this.destructiveButtons = [];
+        this.isShiftHeld = false;
+
+        // Bind shift handlers for destructive action indicators
+        this.handleKeyDown = (e) => {
+            if (e.key === 'Shift' && !this.isShiftHeld) {
+                this.isShiftHeld = true;
+                this.popoverContainer.classList.add('shift-held');
+            }
+        };
+
+        this.handleKeyUp = (e) => {
+            if (e.key === 'Shift' && this.isShiftHeld) {
+                this.isShiftHeld = false;
+                this.popoverContainer.classList.remove('shift-held');
+            }
+        };
+
+        document.addEventListener('keydown', this.handleKeyDown);
+        document.addEventListener('keyup', this.handleKeyUp);
     }
 
     /**
      * Creates and adds a clickable button to the popover.
      * @param {string} textLabel - The text to display on the button.
      * @param {Function} clickFn - Callback function executed when button is clicked. Receives click event as parameter. Should return true on success.
+     * @param {Object} [options] - Optional configuration.
+     * @param {boolean} [options.destructive=false] - If true, shows chevron indicator when Shift is held to indicate confirmation bypass.
      */
-    createAndAddButton(textLabel, clickFn) {
+    createAndAddButton(textLabel, clickFn, options = {}) {
+        const { destructive = false } = options;
+
         const popoverButton = document.createElement('div');
         popoverButton.classList.add('popoverItem', 'popoverButton');
-        popoverButton.textContent = textLabel;
+
+        if (destructive) {
+            popoverButton.classList.add('destructive');
+        }
+
+        const labelSpan = document.createElement('span');
+        labelSpan.classList.add('button-label');
+        labelSpan.textContent = textLabel;
+        popoverButton.appendChild(labelSpan);
+
+        if (destructive) {
+            const chevron = document.createElement('span');
+            chevron.classList.add('destructive-chevron');
+            chevron.textContent = '»';
+            chevron.setAttribute('aria-hidden', 'true');
+            popoverButton.appendChild(chevron);
+        }
+
         this.popoverContainer.appendChild(popoverButton);
 
         popoverButton.addEventListener('click', (event) => {
@@ -355,7 +397,9 @@ export class Popover {
     remove(){
         this.target.classList.remove('focus');
         this.popoverContainer.remove();
-        document.removeEventListener('mousedown', this.clickHandler)
+        document.removeEventListener('mousedown', this.clickHandler);
+        document.removeEventListener('keydown', this.handleKeyDown);
+        document.removeEventListener('keyup', this.handleKeyUp);
     }
 
 }

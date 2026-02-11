@@ -53,6 +53,7 @@ export class ConfirmationDialog {
         dialogContainer.classList.add('confirmationDialog');
         dialogContainer.innerHTML = `
             <h2>${message}</h2>
+            <span><strong>Tip</strong>: Hold Shift while clicking to skip confirmations</span>
             <div class='menu-container'>
                 <button class='menuButton' id='cancelBtn'>${cancelText}</button>
                 <button class='menuButton' id='confirmBtn'>${confirmText}</button>

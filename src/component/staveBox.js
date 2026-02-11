@@ -55,8 +55,8 @@ export class StaveBox {
         this.contextMenuOptions = [
             { label: 'duplicate', func: this.duplicate },
             { label: 'change tuning', func: this.openChangeTuningMenu },
-            { label: 'clear', func: this.confirmClearGrid },
-            { label: 'remove', func: this.confirmRemove }
+            { label: 'clear', func: this.confirmClearGrid, destructive: true },
+            { label: 'remove', func: this.confirmRemove, destructive: true }
         ];
 
         // Right-click context menu handler on the entire component
@@ -69,11 +69,12 @@ export class StaveBox {
             popUpContextMenu.createAndAddDivisor();
             
             for (let i = 0; i < this.contextMenuOptions.length; i++) {
-                popUpContextMenu.createAndAddButton(this.contextMenuOptions[i].label, (event) => {
-                    const f = this.contextMenuOptions[i].func.bind(this);
+                const opt = this.contextMenuOptions[i];
+                popUpContextMenu.createAndAddButton(opt.label, (event) => {
+                    const f = opt.func.bind(this);
                     f(event);
                     return true;
-                });
+                }, { destructive: opt.destructive });
             }
             
             popUpContextMenu.endPopover();

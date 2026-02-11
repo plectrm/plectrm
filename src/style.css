@@ -1163,7 +1163,16 @@ body{
 }
 
 .confirmationDialog h2{
-    font-size: 1rem;
+    font-size: 1.2rem;
+    font-weight: 400;
+    margin: 0;
+    text-align: center;
+    width: 100%;
+}
+
+.confirmationDialog span{
+    font-size: 0.7rem;
+    color: var(--color-light-tertiary);
     font-weight: 400;
     margin: 0;
     text-align: center;
@@ -1212,4 +1221,23 @@ body{
     font-family: inherit;
     font-size: 0.8rem;
     transition: all 150ms ease;
+}
+
+.popoverButton.destructive {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.destructive-chevron {
+    font-size: 1em;
+    letter-spacing: -0.1em;
+    color: var(--color-light-primary);
+    opacity: 0;
+    transition: opacity 80ms ease;
+    margin-left: 0.5em;
+}
+
+.popoverContainer.shift-held .destructive-chevron {
+    opacity: 1;
 }
