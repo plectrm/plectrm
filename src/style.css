@@ -56,7 +56,7 @@ body{
     width: 100%;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--color-dark-secondary) transparent;
+    scrollbar-color: var(--color-light-secondary) transparent;
     padding: 1em;
 }
 
@@ -98,12 +98,12 @@ body{
     color: var(--color-light-primary);
 }
 
-.ribbonButton:hover{
+.ribbonButton:not(:disabled):hover{
     background-color: var(--color-dark-secondary);
 }
 
-.ribbonButton:active,
-.ribbonButton.focus{
+.ribbonButton:not(:disabled):active,
+.ribbonButton:not(:disabled).focus{
     border: 1px solid var(--color-light-tertiary);
     background-color: var(--color-dark-tertiary);
 }
@@ -111,6 +111,10 @@ body{
 .ribbonButton svg{
     width: 50%;
     height: 50%;
+}
+
+.ribbonButton:disabled{
+    color: var(--color-dark-secondary);
 }
 
 .ribbonSplitDropdown{
@@ -170,8 +174,8 @@ body{
 
 .ribbonSplitDropdownDropdown:active,
 .ribbonSplitDropdownDropdown.focus{
-    border: 1px solid var(--color-light-tertiary);
-    background-color: var(--color-dark-tertiary);
+    border: 1px solid var(--color-dark-secondary);
+    background-color: var(--color-dark-primary);
 }
 
 .ribbonSplitDropdownDropdown svg{
@@ -226,6 +230,9 @@ body{
     display: flex;
     flex-direction: column;
     gap: 1em;
+    transform-origin: 0 0;
+    text-rendering: geometricPrecision;
+    will-change: transform;
 }
 
 .workspaceContainer:focus{
@@ -256,8 +263,8 @@ body{
 
 .foreground.active{
     pointer-events: all;
-    backdrop-filter: blur(4px);
-    background-color: color-mix(in srgb, var(--color-dark-primary) 90%, transparent);
+    backdrop-filter: blur(2px);
+    background-color: color-mix(in srgb, var(--color-dark-primary) 50%, transparent);
 }
 
 .prototypeContainer{
@@ -1138,6 +1145,71 @@ body{
     50% { opacity: 0.7; }
 }
 
+/* Confirmation Dialog */
+.confirmationDialog{
+    margin: auto;
+    width: 12rem;
+    background-color: var(--color-dark-primary);
+    border: 1px solid var(--color-dark-secondary);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+    color: var(--color-light-primary);
+    border-radius: 1rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    user-select: none;
+}
+
+.confirmationDialog h2{
+    font-size: 1.2rem;
+    font-weight: 400;
+    margin: 0;
+    text-align: center;
+    width: 100%;
+}
+
+.confirmationDialog span{
+    font-size: 0.7rem;
+    color: var(--color-light-tertiary);
+    font-weight: 400;
+    margin: 0;
+    text-align: center;
+    width: 100%;
+}
+
+.confirmationDialog .menu-container{
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    margin-top: 0;
+    width: 100%;
+}
+
+.confirmationDialog .menuButton{
+    height: auto;
+    width: 4.5rem;
+    aspect-ratio: auto;
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.confirmationDialog #confirmBtn{
+    background-color: var(--color-red);
+    border-color: var(--color-red);
+}
+
+.confirmationDialog #confirmBtn:hover{
+    background-color: var(--color-red-dark);
+    border-color: var(--color-red-dark);
+}
+
+.confirmationDialog #confirmBtn:active{
+    background-color: var(--color-red-dark);
+    border-color: var(--color-red);
+}
+
 .update-status .downloading{
     border: 1px solid var(--color-blue);
     background: var(--color-blue);
@@ -1149,4 +1221,23 @@ body{
     font-family: inherit;
     font-size: 0.8rem;
     transition: all 150ms ease;
+}
+
+.popoverButton.destructive {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.destructive-chevron {
+    font-size: 1em;
+    letter-spacing: -0.1em;
+    color: var(--color-light-primary);
+    opacity: 0;
+    transition: opacity 80ms ease;
+    margin-left: 0.5em;
+}
+
+.popoverContainer.shift-held .destructive-chevron {
+    opacity: 1;
 }

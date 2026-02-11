@@ -1,4 +1,4 @@
-
+import { ConfirmationDialog } from "@/lib/foreground.js";
 
 export class DragHandle {
     constructor(parentObject, workspace) {
@@ -19,7 +19,6 @@ export class DragHandle {
         let nextElement = parentContainer.nextElementSibling;
         let nextElementRect;
         let yOffset = 0;
-        deleteButton.clickAcc = 0;
 
         const resizeHandler = (entry) => {
             //calculates the approximate height of the parent object in ems
@@ -154,21 +153,14 @@ export class DragHandle {
         })
 
         deleteButton.addEventListener('mousedown', (event) => {
-            deleteButton.clickAcc += 1;
-            if (deleteButton.clickAcc === 1){
-                deleteButton.classList.add('confirmDelete');
-            }
-            if (deleteButton.clickAcc === 2){
+            if (event?.shiftKey) {
                 parentObject.remove();
+                return;
             }
-        })
-
-        deleteButton.addEventListener('mouseleave', () => {
-            if (deleteButton.clickAcc){
-                deleteButton.clickAcc = 0;
-                deleteButton.classList.remove('confirmDelete');
-            }
-
+            new ConfirmationDialog(
+                'Delete this item?',
+                () => parentObject.remove()
+            );
         })
 
         return contextMenu;

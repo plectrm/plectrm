@@ -1,5 +1,6 @@
 import { DragHandle } from "@/component/dragHandle.js";
 import { Popover } from "@/lib/popover.js";
+import { ConfirmationDialog } from "@/lib/foreground.js";
 
 export class NotationLegend {
     /** @type {string} - Display name for context menus (minification-safe) */
@@ -8,7 +9,7 @@ export class NotationLegend {
     constructor(workspace, textContent = '') {
 
         this.parentWorkspace = workspace;
-        this.contextMenuOptions = [{label: 'remove', func: this.remove}];
+        this.contextMenuOptions = [{label: 'remove', func: this.confirmRemove}];
 
         this.componentContainer = document.createElement('div');
         this.componentContainer.classList.add('prototypeContainer','legend');
@@ -54,6 +55,17 @@ export class NotationLegend {
         const index = this.parentWorkspace.ChildObjects.indexOf(this);
         this.parentWorkspace.ChildObjects.splice(index, 1);
         this.componentContainer.remove();
+    }
+
+    confirmRemove(event){
+        if (event?.shiftKey) {
+            this.remove();
+            return;
+        }
+        new ConfirmationDialog(
+            'Delete this notation legend?',
+            () => this.remove()
+        );
     }
 
     getRootContainer(){
@@ -147,10 +159,21 @@ class TechniqueEntry{
                     }
                     return true;
                 });
-                editEntryMenu.createAndAddButton('remove', ()=>{
-                    const idx = parentObject.techniqueEntries.indexOf(this);
-                    parentObject.techniqueEntries.splice(idx, 1);
-                    this.remove();
+                editEntryMenu.createAndAddButton('remove', (clickEvent)=>{
+                    if (clickEvent?.shiftKey) {
+                        const idx = parentObject.techniqueEntries.indexOf(this);
+                        parentObject.techniqueEntries.splice(idx, 1);
+                        this.remove();
+                        return true;
+                    }
+                    new ConfirmationDialog(
+                        'Delete this entry?',
+                        () => {
+                            const idx = parentObject.techniqueEntries.indexOf(this);
+                            parentObject.techniqueEntries.splice(idx, 1);
+                            this.remove();
+                        }
+                    );
                     return true;
                 });
                 editEntryMenu.endPopover();
